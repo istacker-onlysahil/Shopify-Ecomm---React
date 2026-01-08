@@ -82,6 +82,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ collections, loading, onAddTo
           <p className="text-xs md:text-base text-gray-500 font-medium animate-pulse tracking-wide">Loading...</p>
         </div>
       ) : (
+        // OPTIMIZATION: User requested keeping 3 columns on mobile (grid-cols-3).
+        // Desktop scales up to 5 columns.
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-x-6 md:gap-y-10 min-h-[400px]">
           {displayedProducts.length > 0 ? (
             displayedProducts.map((product, index) => (

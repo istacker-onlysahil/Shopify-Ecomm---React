@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ImageOff } from 'lucide-react';
 
 interface ShopifyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -37,6 +37,7 @@ const getOptimizedImageUrl = (src: string, width: number, crop?: string) => {
     if (url.hostname.includes('cdn.shopify.com')) {
       url.searchParams.set('width', width.toString());
       url.searchParams.set('format', 'auto'); 
+      // Use webp/avif automatically via 'auto'
       url.searchParams.set('quality', '75');
       if (crop) {
         url.searchParams.set('crop', crop);
@@ -65,17 +66,27 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
-  // If src changes, reset state
+  // Reset state when src changes
   useEffect(() => {
     setIsLoaded(false);
     setHasError(false);
   }, [src]);
 
+  // FIX: Check if image is already cached/complete
+  // This solves the issue where cached images don't trigger onLoad
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setIsLoaded(true);
+    }
+  }, [src]);
+
   if (!src) return <div className={`bg-gray-100 flex items-center justify-center ${className}`}><ImageOff className="text-gray-300" size={24} /></div>;
 
-  // Generate widths for srcset. 
-  const targetWidths = [320, 480, 640, 750, 828, 1080, 1200, 1920, 2048, 3840];
+  // Optimized widths for Shopify CDN Cache hits. 
+  // Includes standard mobile sizes (165, 360) to prevent fetching 600px+ images on small screens.
+  const targetWidths = [165, 360, 533, 720, 940, 1066, 1280, 1500, 1920, 2560];
 
   // If error occurred, don't use optimized URLs, try raw src
   const srcSet = hasError 
@@ -88,9 +99,9 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
         .join(', ');
 
   // Generate a fallback src (usually a middle-ground size)
-  const defaultSrc = hasError ? src : getOptimizedImageUrl(src, 800, crop);
+  const defaultSrc = hasError ? src : getOptimizedImageUrl(src, 600, crop);
 
-  // PERFORMANCE: If priority is true, we want LCP to happen immediately.
+  // PERFORMANCE: If priority is true, or loaded, show immediately.
   const shouldShowImmediately = priority || isLoaded || hasError;
 
   return (
@@ -101,6 +112,7 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
       )}
       
       <img
+        ref={imgRef}
         src={defaultSrc}
         srcSet={srcSet}
         sizes={sizes}

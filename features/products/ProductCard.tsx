@@ -73,7 +73,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         <ShopifyImage
           src={featuredImage?.url || 'https://picsum.photos/400/500'}
           alt={featuredImage?.altText || title}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          // OPTIMIZATION: Updated for 3-column mobile layout. 
+          // On mobile (max 640px) 3 columns -> 33vw. 
+          // On tablet (1024) 4 columns -> 25vw. Desktop -> 20vw.
+          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
           className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110"
         />
         

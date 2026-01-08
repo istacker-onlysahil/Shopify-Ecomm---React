@@ -14,7 +14,8 @@ const HeroSection: React.FC = () => {
           src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=2000" 
           alt="Summer Arrival" 
           priority={true} // Critical for LCP
-          sizes="100vw"
+          // OPTIMIZATION: On mobile, 100vw is enough, we don't need the full 2000px desktop version
+          sizes="(max-width: 768px) 100vw, 100vw"
           className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#598ca8]/90 to-transparent mix-blend-multiply" />
