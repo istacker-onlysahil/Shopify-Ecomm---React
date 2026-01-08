@@ -1,7 +1,7 @@
-
 import React from 'react';
-import { X, ChevronRight, Instagram, Twitter, Facebook } from 'lucide-react';
+import { X, ChevronRight, Instagram, Twitter, Facebook, LogOut, User } from 'lucide-react';
 import { ShopifyImage } from '../ui/ShopifyImage';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -10,6 +10,18 @@ interface MobileMenuProps {
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onNavigate }) => {
+  const { isAuthenticated, customer, logout, setShowAuthModal, setAuthView } = useAuth();
+
+  const handleAuthAction = () => {
+    onClose();
+    if (isAuthenticated) {
+        logout();
+    } else {
+        setAuthView('login');
+        setShowAuthModal(true);
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -33,22 +45,39 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onNavigate }) 
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {/* Featured Banner */}
-          <div className="p-5 pb-2">
-            <div className="relative aspect-[2/1] rounded-xl overflow-hidden mb-6">
-              <ShopifyImage 
-                src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" 
-                alt="New Collection" 
-                sizes="350px"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/20" />
-              <div className="absolute bottom-4 left-4 text-white">
-                <p className="text-xs font-bold uppercase tracking-wider mb-1">New In</p>
-                <h3 className="font-serif text-xl">Summer 2025</h3>
-              </div>
+          
+          {isAuthenticated && (
+            <div className="p-5 bg-gray-50 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm">
+                        {customer?.firstName?.charAt(0)}{customer?.lastName?.charAt(0)}
+                    </div>
+                    <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-widest">Welcome,</p>
+                        <p className="font-bold text-gray-900">{customer?.firstName} {customer?.lastName}</p>
+                    </div>
+                </div>
             </div>
-          </div>
+          )}
+
+          {/* Featured Banner (Only show if not logged in to save space) */}
+          {!isAuthenticated && (
+            <div className="p-5 pb-2">
+                <div className="relative aspect-[2/1] rounded-xl overflow-hidden mb-6">
+                <ShopifyImage 
+                    src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" 
+                    alt="New Collection" 
+                    sizes="350px"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute bottom-4 left-4 text-white">
+                    <p className="text-xs font-bold uppercase tracking-wider mb-1">New In</p>
+                    <h3 className="font-serif text-xl">Summer 2025</h3>
+                </div>
+                </div>
+            </div>
+          )}
 
           <nav className="px-5 space-y-1">
             {['New Arrivals', 'Shop All', 'Best Sellers', 'Men', 'Women', 'Accessories', 'Journal'].map((item) => (
@@ -64,8 +93,21 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onNavigate }) 
           </nav>
           
           <div className="p-5 mt-4 space-y-4">
-             <button className="w-full py-3 border border-gray-200 rounded-full font-bold text-sm uppercase tracking-wide hover:border-black hover:bg-black hover:text-white transition-all">
-               Login / Register
+             <button 
+                onClick={handleAuthAction}
+                className={`w-full py-3 border rounded-full font-bold text-sm uppercase tracking-wide transition-all flex items-center justify-center gap-2 ${
+                    isAuthenticated 
+                    ? 'border-gray-200 text-red-500 hover:bg-red-50 hover:border-red-200' 
+                    : 'border-gray-200 hover:border-black hover:bg-black hover:text-white'
+                }`}
+             >
+               {isAuthenticated ? (
+                   <>
+                    <LogOut size={16} /> Sign Out
+                   </>
+               ) : (
+                   'Login / Register'
+               )}
              </button>
           </div>
         </div>

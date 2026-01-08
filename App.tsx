@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 
 // Types & Services
@@ -6,6 +5,7 @@ import { ShopifyProduct, ApiConfig, ToastMessage, ShopifyCollection, TransitionR
 import { DEFAULT_CONFIG } from './config/constants';
 import { fetchShopifyCollections } from './services/shopify';
 import { useCart } from './hooks/useCart';
+import { AuthProvider } from './contexts/AuthContext';
 
 // UI & Layout
 import Toast from './components/ui/Toast';
@@ -13,6 +13,7 @@ import Navbar from './components/layout/Navbar';
 import MobileMenu from './components/layout/MobileMenu';
 import MobileDock from './components/layout/MobileDock';
 import { Reveal } from './components/ui/Reveal';
+import AuthModal from './components/auth/AuthModal';
 
 // Eager Loaded Features (Above the fold)
 import HeroSection from './features/landing/HeroSection';
@@ -28,7 +29,8 @@ const ReviewsSection = lazy(() => import('./features/landing/ReviewsSection'));
 const NewsletterSection = lazy(() => import('./features/landing/NewsletterSection'));
 const Footer = lazy(() => import('./components/layout/Footer'));
 
-const App: React.FC = () => {
+// --- Inner App Component that consumes AuthContext ---
+const StorefrontApp: React.FC = () => {
   // State
   const [collections, setCollections] = useState<ShopifyCollection[]>([]);
   // We need a flat list of products for the "You might also like" section
@@ -64,8 +66,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       // If the user presses the back button and we have a product open, close it.
-      // We assume that if a popstate event fires, we should return to the grid view 
-      // if a product is currently selected.
       if (selectedProduct) {
         setSelectedProduct(null);
       }
@@ -137,6 +137,8 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-black selection:text-white pb-20 md:pb-0">
       <Toast toast={toast} onClose={() => setToast(null)} />
+      
+      <AuthModal showToast={showToast} />
 
       <Navbar 
         isScrolled={isScrolled}
@@ -230,6 +232,15 @@ const App: React.FC = () => {
         onRemove={removeFromCart}
       />
     </div>
+  );
+};
+
+// Root App Component wrapper
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <StorefrontApp />
+    </AuthProvider>
   );
 };
 

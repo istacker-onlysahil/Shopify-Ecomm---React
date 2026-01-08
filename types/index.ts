@@ -1,4 +1,5 @@
 
+
 export interface ShopifyImage {
   url: string;
   altText: string | null;
@@ -71,4 +72,24 @@ export interface TransitionRect {
   left: number;
   width: number;
   height: number;
+}
+
+// --- Auth Types ---
+
+export interface Customer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+}
+
+export interface CustomerAccessToken {
+  accessToken: string;
+  expiresAt: string;
+}
+
+export interface AuthError {
+  message: string;
+  code?: string;
 }

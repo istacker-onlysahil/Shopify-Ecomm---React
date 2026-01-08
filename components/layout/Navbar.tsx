@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
-import { Search, Menu, User } from 'lucide-react';
+import { Search, Menu, User, LogOut } from 'lucide-react';
 import { CustomCartIcon } from '../icons/CustomCartIcon';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface NavbarProps {
   isScrolled: boolean;
@@ -22,6 +22,8 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const { isAuthenticated, customer, logout, setShowAuthModal, setAuthView } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const announcements = [
     "Free Worldwide Shipping on Orders Over $200",
@@ -35,6 +37,15 @@ const Navbar: React.FC<NavbarProps> = ({
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleUserClick = () => {
+    if (isAuthenticated) {
+      setShowUserMenu(!showUserMenu);
+    } else {
+      setAuthView('login');
+      setShowAuthModal(true);
+    }
+  };
 
   return (
     <>
@@ -109,9 +120,31 @@ const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {/* Account (Desktop) */}
-              <button className="hidden md:block p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
-                <User size={20} strokeWidth={1.5} />
-              </button>
+              <div className="relative hidden md:block">
+                <button 
+                  onClick={handleUserClick}
+                  className={`p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center gap-2 ${isAuthenticated ? 'text-black font-medium' : 'text-gray-900'}`}
+                >
+                  <User size={20} strokeWidth={1.5} />
+                  {isAuthenticated && <span className="text-xs uppercase font-bold">{customer?.firstName}</span>}
+                </button>
+
+                {/* User Dropdown */}
+                {isAuthenticated && showUserMenu && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-scale-in origin-top-right">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">Signed in as</p>
+                      <p className="text-sm font-bold truncate">{customer?.email}</p>
+                    </div>
+                    <button 
+                      onClick={() => { logout(); setShowUserMenu(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <LogOut size={14} /> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Cart */}
               <button 
