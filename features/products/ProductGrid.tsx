@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { ShopifyCollection, ShopifyProduct } from '../../types/index';
+import { ShopifyCollection, ShopifyProduct, TransitionRect } from '../../types/index';
 import ProductCard from './ProductCard';
 import { Reveal } from '../../components/ui/Reveal';
 
@@ -9,7 +9,7 @@ interface ProductGridProps {
   collections: ShopifyCollection[];
   loading: boolean;
   onAddToCart: (product: ShopifyProduct, variantId?: string) => void;
-  onSelectProduct: (product: ShopifyProduct) => void;
+  onSelectProduct: (product: ShopifyProduct, rect?: TransitionRect) => void;
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ collections, loading, onAddToCart, onSelectProduct }) => {

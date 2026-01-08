@@ -17,7 +17,7 @@ interface ShopifyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
  * UTILITY: Appends size parameters to URL.
  * Supports Shopify CDN and Unsplash (for demo data compatibility).
  */
-const getOptimizedImageUrl = (src: string, width: number, crop?: string) => {
+export const getOptimizedImageUrl = (src: string, width: number, crop?: string) => {
   if (!src) return '';
   
   try {
@@ -26,7 +26,7 @@ const getOptimizedImageUrl = (src: string, width: number, crop?: string) => {
     // 1. Handle Unsplash URLs (For Demo Data)
     if (url.hostname.includes('unsplash.com')) {
       url.searchParams.set('w', width.toString());
-      url.searchParams.set('q', '75'); // Quality
+      url.searchParams.set('q', '80'); // Increased Quality to 80
       url.searchParams.set('auto', 'format'); // WebP/AVIF
       url.searchParams.set('fit', 'crop');
       return url.toString();
@@ -38,7 +38,7 @@ const getOptimizedImageUrl = (src: string, width: number, crop?: string) => {
       url.searchParams.set('width', width.toString());
       url.searchParams.set('format', 'auto'); 
       // Use webp/avif automatically via 'auto'
-      url.searchParams.set('quality', '75');
+      url.searchParams.set('quality', '80'); // Increased Quality to 80
       if (crop) {
         url.searchParams.set('crop', crop);
       }
@@ -106,9 +106,12 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/* Skeleton / Placeholder behind image */}
-      {!shouldShowImmediately && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+      {/* 
+        FIX: Always show skeleton if not loaded, regardless of priority. 
+        This prevents empty container flash when high-res priority images are still fetching. 
+      */}
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-gray-100 animate-pulse z-0" />
       )}
       
       <img
@@ -122,7 +125,7 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
         loading={priority ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : 'auto'}
         decoding={priority ? 'sync' : 'async'}
-        className={`w-full h-full object-cover transition-opacity duration-500 ease-out ${
+        className={`w-full h-full object-cover relative z-10 transition-opacity duration-500 ease-out ${
            shouldShowImmediately ? 'opacity-100' : 'opacity-0'
         }`}
         onLoad={() => setIsLoaded(true)}

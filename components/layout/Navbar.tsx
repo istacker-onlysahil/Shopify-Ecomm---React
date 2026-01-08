@@ -14,6 +14,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ 
   isScrolled, 
+  selectedProduct,
   setMobileMenuOpen, 
   setSelectedProduct, 
   setCartOpen, 
@@ -38,7 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* Top Announcement Bar */}
-      <div className="bg-black text-white text-[10px] md:text-xs py-2 md:py-2.5 text-center font-medium tracking-widest uppercase relative z-50 overflow-hidden">
+      <div className={`bg-black text-white text-[10px] md:text-xs py-2 md:py-2.5 text-center font-medium tracking-widest uppercase relative z-50 overflow-hidden block`}>
         <div className="transition-transform duration-500 ease-in-out" key={announcementIndex}>
             {announcements[announcementIndex]}
         </div>
@@ -48,9 +49,9 @@ const Navbar: React.FC<NavbarProps> = ({
       <nav 
         className={`sticky top-0 w-full z-40 transition-all duration-300 border-b ${
           isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-sm border-gray-100 py-2' 
+          ? 'bg-white/95 backdrop-blur-md shadow-sm border-gray-100 py-3 md:py-3' 
           : 'bg-white/90 backdrop-blur-sm border-transparent py-3 md:py-5'
-        }`}
+        } block`}
       >
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">

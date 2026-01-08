@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Heart, Loader2 } from 'lucide-react';
-import { ShopifyProduct } from '../../types/index';
+import { ShopifyProduct, TransitionRect } from '../../types/index';
 import { CustomCartIcon } from '../../components/icons/CustomCartIcon';
 import { Select } from '../../components/ui/Select';
 import { ShopifyImage } from '../../components/ui/ShopifyImage';
@@ -9,11 +9,12 @@ import { ShopifyImage } from '../../components/ui/ShopifyImage';
 interface ProductCardProps {
   product: ShopifyProduct;
   onAddToCart: (product: ShopifyProduct, variantId?: string) => void;
-  onClick: (product: ShopifyProduct) => void;
+  onClick: (product: ShopifyProduct, rect?: TransitionRect) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick }) => {
   const { title, featuredImage, variants } = product;
+  const imageRef = useRef<HTMLDivElement>(null);
   
   // Variant State Management
   const hasMultipleVariants = variants.edges.length > 1;
@@ -38,6 +39,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
     
     // Reset state after a very small frame to show the transition
     setTimeout(() => setIsAdding(false), 300);
+  };
+
+  const handleClick = () => {
+    if (imageRef.current) {
+      const rect = imageRef.current.getBoundingClientRect();
+      onClick(product, {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height
+      });
+    } else {
+      onClick(product);
+    }
   };
 
   // Pricing Logic
@@ -65,18 +80,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
 
   return (
     <div 
-        className="group relative flex flex-col h-full bg-transparent"
-        onClick={() => onClick(product)}
+        className="group relative flex flex-col h-full bg-transparent cursor-pointer"
+        onClick={handleClick}
     >
       {/* Image Container - Fully Rounded to match button style */}
-      <div className="relative aspect-[3/4] bg-gray-50 overflow-hidden rounded-xl border border-gray-100/50 shadow-sm transition-all duration-300 hover:shadow-md">
+      <div 
+        ref={imageRef}
+        className="relative aspect-[3/4] bg-gray-50 overflow-hidden rounded-xl border border-gray-100/50 shadow-sm transition-all duration-300 hover:shadow-md"
+      >
         <ShopifyImage
           src={featuredImage?.url || 'https://picsum.photos/400/500'}
           alt={featuredImage?.altText || title}
-          // OPTIMIZATION: Updated for 3-column mobile layout. 
-          // On mobile (max 640px) 3 columns -> 33vw. 
-          // On tablet (1024) 4 columns -> 25vw. Desktop -> 20vw.
-          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
+          // OPTIMIZATION FIXED: Significantly increased sizing to prevent blurriness on Retina screens.
+          // Mobile: 60vw (oversampled for sharpness on 3-col grid)
+          // Tablet: 40vw
+          // Desktop: 30vw
+          sizes="(max-width: 640px) 60vw, (max-width: 1024px) 40vw, 30vw"
           className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110"
         />
         
@@ -143,7 +162,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         </h3>
         
         {/* Variant Select */}
-        <div className="w-full relative z-20 h-7 md:h-8">
+        <div className="w-full relative z-20 h-7 md:h-8" onClick={e => e.stopPropagation()}>
             {hasMultipleVariants ? (
                 <Select 
                     value={selectedVariantId}

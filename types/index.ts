@@ -65,3 +65,10 @@ export interface ToastMessage {
   message: string;
   type: ToastType;
 }
+
+export interface TransitionRect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}

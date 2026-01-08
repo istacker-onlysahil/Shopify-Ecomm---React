@@ -1,23 +1,33 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { ArrowLeft, ShoppingBag, Truck, Shield, ChevronDown, ChevronUp, Share2, Heart } from 'lucide-react';
-import { ShopifyProduct } from '../../types/index';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination } from 'swiper/modules';
+import { ShopifyProduct, TransitionRect } from '../../types/index';
 import { Reveal } from '../../components/ui/Reveal';
-import { ShopifyImage } from '../../components/ui/ShopifyImage';
+import { ShopifyImage, getOptimizedImageUrl } from '../../components/ui/ShopifyImage';
 
 interface ProductDetailProps {
   product: ShopifyProduct;
+  originRect?: TransitionRect | null;
   onBack: () => void;
   onAddToCart: (product: ShopifyProduct, variantId?: string) => void;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToCart }) => {
+const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBack, onAddToCart }) => {
   const { title, description, descriptionHtml, images, variants } = product;
   
   const [selectedVariantId, setSelectedVariantId] = useState(variants.edges[0]?.node.id);
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
   const [isScrolledPastCTA, setIsScrolledPastCTA] = useState(false);
   const mainButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Animation States
+  const [isAnimating, setIsAnimating] = useState(!!originRect);
+  // New state: Controls when the real content becomes visible underneath the ghost
+  const [showRealContent, setShowRealContent] = useState(!originRect);
+  const [animStyle, setAnimStyle] = useState<React.CSSProperties>({});
+  const placeholderRef = useRef<HTMLDivElement>(null);
 
   const currentVariant = variants.edges.find(v => v.node.id === selectedVariantId)?.node || variants.edges[0]?.node;
   const price = currentVariant.price;
@@ -34,6 +44,87 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
     style: 'currency',
     currency: price?.currencyCode || 'USD',
   }).format(parseFloat(price?.amount || '0'));
+
+  // --- Scroll Lock during Animation ---
+  useEffect(() => {
+    if (isAnimating) {
+      document.body.style.overflow = 'hidden';
+      // Prevent momentum scrolling on mobile
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isAnimating]);
+
+  // --- Animation Logic (FLIP) ---
+  useLayoutEffect(() => {
+    // 1. Force Scroll to Top Immediately (Instant)
+    window.scrollTo({ top: 0, behavior: 'auto' });
+
+    // If no origin, skip animation
+    if (!originRect) return;
+
+    // 2. Initial State: Set ghost image to fixed position matching the card's original position
+    setAnimStyle({
+      position: 'fixed',
+      top: originRect.top,
+      left: originRect.left,
+      width: originRect.width,
+      height: originRect.height,
+      zIndex: 9999, // Fly OVER the global navbar
+      borderRadius: '0.75rem', 
+      transition: 'none',
+      objectFit: 'cover'
+    });
+
+    // 3. Animate to Destination
+    const frameId = requestAnimationFrame(() => {
+       requestAnimationFrame(() => {
+          if (!placeholderRef.current) return;
+          const destRect = placeholderRef.current.getBoundingClientRect();
+
+          // Enable transition and set new coordinates
+          setAnimStyle({
+            position: 'fixed',
+            top: destRect.top,
+            left: destRect.left,
+            width: destRect.width,
+            height: destRect.height,
+            zIndex: 9999,
+            borderRadius: '1rem', // Always rounded-2xl for consistency
+            // OPTIMIZATION: Super super fast transition (0.25s)
+            transition: 'all 0.25s cubic-bezier(0.19, 1, 0.22, 1)', 
+            objectFit: 'cover'
+          });
+          
+          // 4. Reveal Real Content slightly BEFORE animation ends (Overlap)
+          // This ensures no white flash when the ghost is removed
+          const revealTimeout = setTimeout(() => {
+             setShowRealContent(true);
+          }, 50); // Almost instant reveal
+
+          // 5. Cleanup: Remove ghost
+          const cleanupTimeout = setTimeout(() => {
+            setIsAnimating(false);
+          }, 250); // Finish exactly at transition end
+
+          return () => {
+             clearTimeout(revealTimeout);
+             clearTimeout(cleanupTimeout);
+          };
+       });
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [originRect]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -67,76 +158,126 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
     </div>
   );
 
+  // PREPARE GHOST IMAGE
+  const targetWidths = [165, 360, 533, 720, 940, 1066, 1280, 1500, 1920, 2560];
+  const ghostSrcSet = targetWidths
+      .map((w) => {
+        const url = getOptimizedImageUrl(selectedImage, w);
+        return `${url} ${w}w`;
+      })
+      .join(', ');
+  
+  const ghostSrc = getOptimizedImageUrl(selectedImage, 600);
+  const ghostSizes = "(max-width: 640px) 60vw, (max-width: 1024px) 40vw, 30vw";
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Mobile Sticky Header */}
-      <div className="fixed top-0 inset-x-0 z-40 md:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 h-16 flex items-center justify-between transition-transform will-change-transform">
-        <button onClick={onBack} className="p-2 -ml-2 text-gray-900">
-          <ArrowLeft size={20} />
-        </button>
-        <span className="font-serif font-bold text-lg truncate px-4">{title}</span>
-        <button className="p-2 -mr-2 text-gray-900">
-          <Share2 size={18} />
-        </button>
-      </div>
+      
+      {/* Ghost Image for Animation */}
+      {isAnimating && (
+        <div 
+            style={animStyle} 
+            className="fixed bg-gray-50 overflow-hidden shadow-2xl pointer-events-none"
+        >
+             <img 
+                src={ghostSrc}
+                srcSet={ghostSrcSet}
+                sizes={ghostSizes}
+                alt=""
+                decoding="sync"
+                className="w-full h-full object-cover object-center block"
+             />
+        </div>
+      )}
 
-      <div className="max-w-[1440px] mx-auto px-0 md:px-8 pt-16 md:pt-32 pb-24">
+      {/* Main Content - Added px-4 pt-4 on mobile to keep image inside page width */}
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-4 md:pt-12 pb-24">
         
-        <Reveal>
+        {/* Back Button (Desktop Only) */}
+        <div className={`hidden md:block transition-opacity duration-300 delay-75 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
           <button 
             onClick={onBack}
-            className="hidden md:inline-flex items-center gap-2 text-sm text-gray-500 hover:text-black mb-10 transition-colors group"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-black mb-10 transition-colors group"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             Back to collection
           </button>
-        </Reveal>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-16 gap-y-0">
           
           <div className="lg:col-span-7 space-y-4">
-            <Reveal delay={100}>
-              <div className="md:rounded-2xl overflow-hidden bg-gray-50 aspect-[3/4] md:aspect-[4/5] relative">
-                <ShopifyImage 
-                  src={selectedImage} 
-                  alt={title}
-                  priority={true} // LCP optimization
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  // Removed animate-blur-in here; let ShopifyImage handle opacity transition internally
-                  className="w-full h-full object-cover object-center"
-                />
-                <button className="absolute bottom-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg md:hidden">
+              {/* Main Image Container - Rounded-2xl on ALL screens */}
+              <div 
+                ref={placeholderRef}
+                className={`relative bg-gray-50 overflow-hidden rounded-2xl ${showRealContent ? 'opacity-100' : 'opacity-0'}`}
+              >
+                {/* Mobile: Swiper Slider */}
+                <div className="block md:hidden">
+                    <Swiper
+                        modules={[Pagination]}
+                        spaceBetween={0}
+                        slidesPerView={1}
+                        pagination={{ clickable: true }}
+                        className="aspect-[3/4] w-full"
+                    >
+                        {allImages.map((img, idx) => (
+                            <SwiperSlide key={idx}>
+                                <ShopifyImage 
+                                    src={img.url} 
+                                    alt={img.altText || title}
+                                    priority={idx === 0} 
+                                    sizes="100vw"
+                                    className="w-full h-full object-cover object-center"
+                                />
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </div>
+
+                {/* Desktop: Single Image View */}
+                <div className="hidden md:block aspect-[4/5]">
+                     <ShopifyImage 
+                        src={selectedImage} 
+                        alt={title}
+                        priority={true}
+                        // Oversample slightly (60vw) to ensure crispness on high DPI screens
+                        sizes="(max-width: 768px) 100vw, 60vw"
+                        className="w-full h-full object-cover object-center"
+                    />
+                </div>
+
+                <button className="absolute bottom-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg md:hidden z-10">
                   <Heart size={20} />
                 </button>
               </div>
-            </Reveal>
             
-            {allImages.length > 1 && (
-              <Reveal delay={200}>
-                <div className="flex gap-3 px-4 md:px-0 overflow-x-auto no-scrollbar py-2">
-                  {allImages.map((img, idx) => (
-                    <button 
-                      key={idx}
-                      onClick={() => setSelectedImage(img.url)}
-                      className={`flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all ${
-                        selectedImage === img.url ? 'border-black shadow-md scale-105' : 'border-transparent opacity-60'
-                      }`}
-                    >
-                      <ShopifyImage 
-                        src={img.url} 
-                        alt=""
-                        width={100} // Tiny thumb optimization
-                        className="w-full h-full object-cover" 
-                      />
-                    </button>
-                  ))}
-                </div>
-              </Reveal>
-            )}
+            {/* Desktop Thumbnails - Rounded XL */}
+            <div className={`hidden md:block transition-all duration-300 delay-75 ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+                {allImages.length > 1 && (
+                    <div className="flex gap-3 px-4 md:px-0 overflow-x-auto no-scrollbar py-2">
+                    {allImages.map((img, idx) => (
+                        <button 
+                        key={idx}
+                        onClick={() => setSelectedImage(img.url)}
+                        className={`flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all ${
+                            selectedImage === img.url ? 'border-black shadow-md scale-105' : 'border-transparent opacity-60'
+                        }`}
+                        >
+                        <ShopifyImage 
+                            src={img.url} 
+                            alt=""
+                            width={100}
+                            className="w-full h-full object-cover" 
+                        />
+                        </button>
+                    ))}
+                    </div>
+                )}
+            </div>
           </div>
 
-          <div className="lg:col-span-5 px-4 md:px-0 pt-8 lg:pt-0 lg:sticky lg:top-32 h-fit space-y-8">
-            <Reveal delay={150}>
+          <div className={`lg:col-span-5 pt-6 lg:pt-0 lg:sticky lg:top-32 h-fit space-y-8 transition-all duration-300 ease-out delay-75 ${isAnimating ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'}`}>
               <div className="space-y-4">
                 <div className="flex justify-between items-start gap-4">
                   <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 leading-[1.1]">
@@ -156,10 +297,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                   )}
                 </div>
               </div>
-            </Reveal>
             
             {variants.edges.length > 1 && (
-              <Reveal delay={200}>
                 <div className="space-y-4">
                   <div className="flex justify-between items-end">
                     <label className="text-xs font-bold uppercase tracking-widest text-gray-900">Select Variant</label>
@@ -181,10 +320,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                     ))}
                   </div>
                 </div>
-              </Reveal>
             )}
 
-            <Reveal delay={250}>
               <div className="space-y-4 pt-4">
                 <button
                   ref={mainButtonRef}
@@ -205,9 +342,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                   <span className="flex items-center gap-1.5"><Shield size={14} /> Secure Checkout</span>
                 </div>
               </div>
-            </Reveal>
 
-            <Reveal delay={300}>
               <div className="pt-8 space-y-0">
                 <Accordion id="details" title="Product Details">
                    <div dangerouslySetInnerHTML={{ __html: descriptionHtml || description }} />
@@ -219,7 +354,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                   <p>100% Premium Cotton. Machine wash cold with like colors. Tumble dry low. Do not bleach.</p>
                 </Accordion>
               </div>
-            </Reveal>
 
           </div>
         </div>

@@ -14,6 +14,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -122,6 +125,11 @@
         transform: translateZ(0);
         will-change: transform, opacity;
       }
+      
+      /* Swiper Customization */
+      .swiper-pagination-bullet-active {
+        background-color: #000 !important;
+      }
     </style>
   <script type="importmap">
 {
@@ -130,7 +138,11 @@
     "react-dom": "https://esm.sh/react-dom@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "swiper": "https://esm.sh/swiper@11.0.5",
+    "swiper/react": "https://esm.sh/swiper@11.0.5/react",
+    "swiper/modules": "https://esm.sh/swiper@11.0.5/modules",
+    "swiper/": "https://esm.sh/swiper@^12.0.3/"
   }
 }
 </script>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 
 // Types & Services
-import { ShopifyProduct, ApiConfig, ToastMessage, ShopifyCollection } from './types/index';
+import { ShopifyProduct, ApiConfig, ToastMessage, ShopifyCollection, TransitionRect } from './types/index';
 import { DEFAULT_CONFIG } from './config/constants';
 import { fetchShopifyCollections } from './services/shopify';
 import { useCart } from './hooks/useCart';
@@ -37,7 +37,11 @@ const App: React.FC = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Selected Product & Transition State
   const [selectedProduct, setSelectedProduct] = useState<ShopifyProduct | null>(null);
+  const [transitionRect, setTransitionRect] = useState<TransitionRect | null>(null);
+  
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [config, setConfig] = useState<ApiConfig>(DEFAULT_CONFIG);
 
@@ -55,10 +59,6 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]); 
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [selectedProduct]);
 
   // Handlers
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -100,6 +100,11 @@ const App: React.FC = () => {
     setMobileMenuOpen(false);
     setSelectedProduct(null);
   };
+  
+  const handleProductSelect = (product: ShopifyProduct, rect?: TransitionRect) => {
+    setTransitionRect(rect || null);
+    setSelectedProduct(product);
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-black selection:text-white pb-20 md:pb-0">
@@ -129,9 +134,11 @@ const App: React.FC = () => {
 
       <div className="relative">
         {selectedProduct ? (
-          <div key="detail" className="animate-fade-in">
+          // IMPORTANT: Removed 'animate-fade-in' class to allow ProductDetail to handle its own shared element transition without opacity conflicts
+          <div key="detail">
              <ProductDetail 
               product={selectedProduct} 
+              originRect={transitionRect}
               onBack={() => setSelectedProduct(null)}
               onAddToCart={handleAddToCart}
             />
@@ -146,7 +153,7 @@ const App: React.FC = () => {
               collections={collections}
               loading={loading}
               onAddToCart={handleAddToCart}
-              onSelectProduct={setSelectedProduct}
+              onSelectProduct={handleProductSelect}
             />
             
             {/* Lazy Load Marketing Sections */}
@@ -166,7 +173,7 @@ const App: React.FC = () => {
                           <ProductCard 
                             product={product} 
                             onAddToCart={handleAddToCart}
-                            onClick={setSelectedProduct}
+                            onClick={(p) => handleProductSelect(p)} // Simplified click for suggested items for now, or could pass rect if needed
                           />
                         </Reveal>
                     ))}
