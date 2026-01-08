@@ -70,7 +70,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
   return (
     <div className="min-h-screen bg-white">
       {/* Mobile Sticky Header */}
-      <div className="fixed top-0 inset-x-0 z-40 md:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 h-16 flex items-center justify-between">
+      <div className="fixed top-0 inset-x-0 z-40 md:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 h-16 flex items-center justify-between transition-transform will-change-transform">
         <button onClick={onBack} className="p-2 -ml-2 text-gray-900">
           <ArrowLeft size={20} />
         </button>
@@ -102,7 +102,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                   alt={title}
                   priority={true} // LCP optimization
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="w-full h-full object-cover object-center animate-blur-in"
+                  // Removed animate-blur-in here; let ShopifyImage handle opacity transition internally
+                  className="w-full h-full object-cover object-center"
                 />
                 <button className="absolute bottom-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg md:hidden">
                   <Heart size={20} />

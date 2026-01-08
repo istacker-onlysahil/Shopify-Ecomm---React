@@ -4,9 +4,11 @@ import { ApiConfig, ShopifyCollection } from '../types/index';
 // Configuration for Shopify Storefront API
 export const DEFAULT_CONFIG: ApiConfig = {
   domain: 'the-website-preview.myshopify.com',
-  // User provided Admin Access Token
-  accessToken: '8bae080f4c6605cd4fa7e4078dc491e7', 
-  // Set to true for Storefront API, false for Admin API
+  // User provided Access Token
+  accessToken: 'f5460d9eb6f898bee916e9af713b3c7d', 
+  // Set to true for Storefront API (public tokens), false for Admin API (private tokens starting with shpat_)
+  // Since the provided token is hex, it is likely a Storefront token or legacy private key.
+  // We default to true as client-side admin calls are blocked by CORS.
   isStorefrontToken: true, 
 };
 

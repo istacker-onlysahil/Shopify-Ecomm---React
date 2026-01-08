@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 
 // Types & Services
 import { ShopifyProduct, ApiConfig, ToastMessage, ShopifyCollection } from './types/index';
@@ -12,19 +12,21 @@ import Toast from './components/ui/Toast';
 import Navbar from './components/layout/Navbar';
 import MobileMenu from './components/layout/MobileMenu';
 import MobileDock from './components/layout/MobileDock';
-import Footer from './components/layout/Footer';
 import { Reveal } from './components/ui/Reveal';
 
-// Features
+// Eager Loaded Features (Above the fold)
 import HeroSection from './features/landing/HeroSection';
 import CategorySection from './features/landing/CategorySection';
-import PromoBanner from './features/landing/PromoBanner';
-import ReviewsSection from './features/landing/ReviewsSection';
-import NewsletterSection from './features/landing/NewsletterSection';
 import ProductGrid from './features/products/ProductGrid';
 import ProductDetail from './features/products/ProductDetail';
 import ProductCard from './features/products/ProductCard';
 import CartDrawer from './features/cart/CartDrawer';
+
+// Lazy Loaded Features (Below the fold) to reduce TBT
+const PromoBanner = lazy(() => import('./features/landing/PromoBanner'));
+const ReviewsSection = lazy(() => import('./features/landing/ReviewsSection'));
+const NewsletterSection = lazy(() => import('./features/landing/NewsletterSection'));
+const Footer = lazy(() => import('./components/layout/Footer'));
 
 const App: React.FC = () => {
   // State
@@ -49,7 +51,7 @@ const App: React.FC = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true }); // Passive listener for scroll performance
     return () => window.removeEventListener('scroll', handleScroll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]); 
@@ -147,35 +149,42 @@ const App: React.FC = () => {
               onSelectProduct={setSelectedProduct}
             />
             
-            <PromoBanner />
-            <ReviewsSection />
+            {/* Lazy Load Marketing Sections */}
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-black animate-spin" /></div>}>
+              <PromoBanner />
+              <ReviewsSection />
 
-            {/* "You might also like" Section (Reuse Products) */}
-            {flatProducts.length > 0 && (
-              <section className="py-6 md:py-12 max-w-[1440px] mx-auto px-2 md:px-8">
-                <Reveal>
-                  <h2 className="text-lg md:text-3xl font-medium text-gray-900 mb-4 md:mb-12 pl-1">You might also like</h2>
-                </Reveal>
-                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-x-6 md:gap-y-10">
-                  {flatProducts.slice(0, 5).map((product, idx) => (
-                      <Reveal key={`like-${idx}`} delay={idx * 50}>
-                        <ProductCard 
-                          product={product} 
-                          onAddToCart={handleAddToCart}
-                          onClick={setSelectedProduct}
-                        />
-                      </Reveal>
-                  ))}
-                </div>
-              </section>
-            )}
+              {/* "You might also like" Section (Reuse Products) */}
+              {flatProducts.length > 0 && (
+                <section className="py-6 md:py-12 max-w-[1440px] mx-auto px-2 md:px-8">
+                  <Reveal>
+                    <h2 className="text-lg md:text-3xl font-medium text-gray-900 mb-4 md:mb-12 pl-1">You might also like</h2>
+                  </Reveal>
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-x-6 md:gap-y-10">
+                    {flatProducts.slice(0, 5).map((product, idx) => (
+                        <Reveal key={`like-${idx}`} delay={idx * 50}>
+                          <ProductCard 
+                            product={product} 
+                            onAddToCart={handleAddToCart}
+                            onClick={setSelectedProduct}
+                          />
+                        </Reveal>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-            <NewsletterSection />
+              <NewsletterSection />
+            </Suspense>
           </div>
         )}
       </div>
 
-      {!selectedProduct && <Footer />}
+      {!selectedProduct && (
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      )}
 
       <CartDrawer 
         isOpen={cartOpen} 

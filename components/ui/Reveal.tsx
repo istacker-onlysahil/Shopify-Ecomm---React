@@ -50,12 +50,11 @@ export const Reveal: React.FC<RevealProps> = ({
   return (
     <div 
       ref={ref} 
-      // Initial state updated to translate-y-[40px] to match the 0% keyframe
-      className={`${className} ${isVisible ? 'animate-blur-in' : 'opacity-0 translate-y-[40px]'}`}
+      // Added 'will-change-transform' to hint browser about impending animation
+      className={`${className} will-change-transform ${isVisible ? 'animate-blur-in' : 'opacity-0 translate-y-[20px]'}`}
       style={{ 
         width, 
-        animationDelay: `${delay}ms`,
-        willChange: 'opacity, filter, transform'
+        animationDelay: `${delay}ms`
       }}
     >
       {children}

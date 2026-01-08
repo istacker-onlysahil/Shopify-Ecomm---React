@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ImageOff } from 'lucide-react';
 
 interface ShopifyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -33,13 +34,18 @@ const getOptimizedImageUrl = (src: string, width: number, crop?: string) => {
 
     // 2. Handle Shopify CDN URLs
     // Shopify format: ?width=500&format=auto
-    url.searchParams.set('width', width.toString());
-    url.searchParams.set('format', 'auto'); 
-    url.searchParams.set('quality', '75');
-    if (crop) {
-      url.searchParams.set('crop', crop);
+    if (url.hostname.includes('cdn.shopify.com')) {
+      url.searchParams.set('width', width.toString());
+      url.searchParams.set('format', 'auto'); 
+      url.searchParams.set('quality', '75');
+      if (crop) {
+        url.searchParams.set('crop', crop);
+      }
+      return url.toString();
     }
-    return url.toString();
+    
+    // Return original if not recognized CDN
+    return src;
   } catch (e) {
     // Fallback for relative paths or invalid URLs
     return src;
@@ -57,34 +63,63 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
   crop,
   ...props
 }) => {
-  if (!src) return <div className={`bg-gray-100 ${className}`} />;
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  // If src changes, reset state
+  useEffect(() => {
+    setIsLoaded(false);
+    setHasError(false);
+  }, [src]);
+
+  if (!src) return <div className={`bg-gray-100 flex items-center justify-center ${className}`}><ImageOff className="text-gray-300" size={24} /></div>;
 
   // Generate widths for srcset. 
   const targetWidths = [320, 480, 640, 750, 828, 1080, 1200, 1920, 2048, 3840];
 
-  const srcSet = targetWidths
-    .map((w) => {
-      const url = getOptimizedImageUrl(src, w, crop);
-      return `${url} ${w}w`;
-    })
-    .join(', ');
+  // If error occurred, don't use optimized URLs, try raw src
+  const srcSet = hasError 
+    ? undefined 
+    : targetWidths
+        .map((w) => {
+          const url = getOptimizedImageUrl(src, w, crop);
+          return `${url} ${w}w`;
+        })
+        .join(', ');
 
   // Generate a fallback src (usually a middle-ground size)
-  const defaultSrc = getOptimizedImageUrl(src, 800, crop);
+  const defaultSrc = hasError ? src : getOptimizedImageUrl(src, 800, crop);
+
+  // PERFORMANCE: If priority is true, we want LCP to happen immediately.
+  const shouldShowImmediately = priority || isLoaded || hasError;
 
   return (
-    <img
-      src={defaultSrc}
-      srcSet={srcSet}
-      sizes={sizes}
-      alt={alt}
-      width={width}
-      height={height}
-      loading={priority ? 'eager' : 'lazy'}
-      fetchPriority={priority ? 'high' : 'auto'}
-      decoding={priority ? 'sync' : 'async'}
-      className={className}
-      {...props}
-    />
+    <div className={`relative overflow-hidden ${className}`}>
+      {/* Skeleton / Placeholder behind image */}
+      {!shouldShowImmediately && (
+        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+      )}
+      
+      <img
+        src={defaultSrc}
+        srcSet={srcSet}
+        sizes={sizes}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        decoding={priority ? 'sync' : 'async'}
+        className={`w-full h-full object-cover transition-opacity duration-500 ease-out ${
+           shouldShowImmediately ? 'opacity-100' : 'opacity-0'
+        }`}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => {
+          setHasError(true);
+          setIsLoaded(true); // Force visibility to show browser's broken image icon or fallback
+        }}
+        {...props}
+      />
+    </div>
   );
 };
