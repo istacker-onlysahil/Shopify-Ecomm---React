@@ -11,6 +11,7 @@ import { useCart } from './hooks/useCart';
 import Toast from './components/ui/Toast';
 import Navbar from './components/layout/Navbar';
 import MobileMenu from './components/layout/MobileMenu';
+import MobileDock from './components/layout/MobileDock';
 import Footer from './components/layout/Footer';
 
 // Features
@@ -114,6 +115,13 @@ const App: React.FC = () => {
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         onNavigate={handleMobileNav}
+      />
+
+      {/* Mobile Floating Dock */}
+      <MobileDock 
+        onOpenCart={() => setCartOpen(true)}
+        onOpenMenu={() => setMobileMenuOpen(true)}
+        cartCount={cartCount}
       />
 
       <div className="relative">
