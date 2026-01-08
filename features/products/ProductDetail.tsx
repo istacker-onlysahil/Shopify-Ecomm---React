@@ -24,7 +24,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
   
   // Animation States
   const [isAnimating, setIsAnimating] = useState(!!originRect);
-  // New state: Controls when the real content becomes visible underneath the ghost
+  // New state: Controls when the real content (TEXT ONLY) becomes visible
   const [showRealContent, setShowRealContent] = useState(!originRect);
   const [animStyle, setAnimStyle] = useState<React.CSSProperties>({});
   const placeholderRef = useRef<HTMLDivElement>(null);
@@ -105,16 +105,19 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
             objectFit: 'cover'
           });
           
-          // 4. Reveal Real Content slightly BEFORE animation ends (Overlap)
-          // This ensures no white flash when the ghost is removed
+          // 4. Reveal TEXT Content slightly BEFORE animation ends
           const revealTimeout = setTimeout(() => {
              setShowRealContent(true);
-          }, 50); // Almost instant reveal
+          }, 50);
 
-          // 5. Cleanup: Remove ghost
+          // 5. Cleanup: Remove ghost with a LARGE SAFETY BUFFER
+          // We wait 500ms (animation is 250ms).
+          // This ensures the ghost stays FROZEN on top of the real image long enough
+          // for a slow phone to fully paint the real image underneath.
+          // The switch happens invisibly because the ghost and real image align perfectly.
           const cleanupTimeout = setTimeout(() => {
             setIsAnimating(false);
-          }, 250); // Finish exactly at transition end
+          }, 500); 
 
           return () => {
              clearTimeout(revealTimeout);
@@ -207,10 +210,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-16 gap-y-0">
           
           <div className="lg:col-span-7 space-y-4">
-              {/* Main Image Container - Rounded-2xl on ALL screens */}
+              {/* 
+                 Main Image Container
+                 CRITICAL FIX: Removed 'opacity' toggle. 
+                 This container is now ALWAYS visible (opacity-100).
+                 It sits BEHIND the ghost image during animation.
+                 This guarantees that when the ghost is removed, the image is ALREADY PAINTED.
+              */}
               <div 
                 ref={placeholderRef}
-                className={`relative bg-gray-50 overflow-hidden rounded-2xl ${showRealContent ? 'opacity-100' : 'opacity-0'}`}
+                className="relative bg-gray-50 overflow-hidden rounded-2xl opacity-100"
               >
                 {/* Mobile: Swiper Slider */}
                 <div className="block md:hidden">
