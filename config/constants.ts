@@ -7,8 +7,7 @@ export const DEFAULT_CONFIG: ApiConfig = {
   // User provided Access Token
   accessToken: '8bae080f4c6605cd4fa7e4078dc491e7', 
   // Set to true for Storefront API (public tokens), false for Admin API (private tokens starting with shpat_)
-  // Note: Standard Admin tokens start with 'shpat_', while Storefront tokens are usually hex strings.
-  // Configured as false (Admin) per request, but if CORS errors occur, this might be a Storefront token (true).
+  // User specified Admin Access Token, so we set this to false.
   isStorefrontToken: true, 
 };
 

@@ -60,6 +60,21 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]); 
 
+  // --- Browser History / Back Button Handler ---
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      // If the user presses the back button and we have a product open, close it.
+      // We assume that if a popstate event fires, we should return to the grid view 
+      // if a product is currently selected.
+      if (selectedProduct) {
+        setSelectedProduct(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedProduct]);
+
   // Handlers
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ id: Date.now().toString(), message, type });
@@ -98,12 +113,25 @@ const App: React.FC = () => {
 
   const handleMobileNav = () => {
     setMobileMenuOpen(false);
-    setSelectedProduct(null);
+    // If a product is open when navigating via menu, just clear it
+    if (selectedProduct) {
+      window.history.back(); // Sync history
+    } else {
+      setSelectedProduct(null);
+    }
   };
   
   const handleProductSelect = (product: ShopifyProduct, rect?: TransitionRect) => {
     setTransitionRect(rect || null);
     setSelectedProduct(product);
+    // Push state to browser history so the "Back" button works
+    window.history.pushState({ productId: product.id }, '', `#product/${product.handle}`);
+  };
+
+  const handleProductClose = () => {
+    // When clicking the UI back button, we go back in history.
+    // This triggers the 'popstate' event listener above, which then clears the selectedProduct.
+    window.history.back();
   };
 
   return (
@@ -139,7 +167,7 @@ const App: React.FC = () => {
              <ProductDetail 
               product={selectedProduct} 
               originRect={transitionRect}
-              onBack={() => setSelectedProduct(null)}
+              onBack={handleProductClose}
               onAddToCart={handleAddToCart}
             />
           </div>
@@ -173,7 +201,7 @@ const App: React.FC = () => {
                           <ProductCard 
                             product={product} 
                             onAddToCart={handleAddToCart}
-                            onClick={(p) => handleProductSelect(p)} // Simplified click for suggested items for now, or could pass rect if needed
+                            onClick={(p) => handleProductSelect(p)} // Simplified click for suggested items for now
                           />
                         </Reveal>
                     ))}
