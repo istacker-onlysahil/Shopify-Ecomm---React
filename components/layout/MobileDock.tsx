@@ -20,48 +20,57 @@ const MobileDock: React.FC<MobileDockProps> = ({ onOpenCart, onOpenMenu, cartCou
     }
   };
 
+  const NavItem = ({ icon: Icon, label, onClick, badge }: { icon: any, label: string, onClick: () => void, badge?: number }) => (
+    <button 
+      onClick={onClick}
+      className="flex-1 flex flex-col items-center justify-center gap-1 py-1 group active:scale-95 transition-transform"
+    >
+      <div className="relative">
+        <Icon 
+          size={20} 
+          strokeWidth={1.5} 
+          className="text-gray-600 group-hover:text-black transition-colors" 
+        />
+        {badge !== undefined && badge > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center border-[2px] border-white shadow-sm">
+            {badge}
+          </span>
+        )}
+      </div>
+      <span className="text-[9px] font-medium tracking-tight text-gray-600 group-hover:text-black transition-colors leading-none">
+        {label}
+      </span>
+    </button>
+  );
+
   return (
-    <div className="fixed bottom-4 inset-x-0 z-50 flex justify-center pointer-events-none md:hidden animate-slide-up">
-      <div className="pointer-events-auto bg-white/95 backdrop-blur-xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-2xl px-6 py-3 flex items-center gap-8 text-gray-500 min-w-[300px] justify-between transition-all duration-300">
+    <div className="fixed bottom-2 inset-x-0 z-50 flex justify-center pointer-events-none md:hidden animate-slide-up">
+      <div className="pointer-events-auto bg-white/75 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl px-6 py-2.5 flex items-center justify-between w-[94%] max-w-[380px]">
         
-        {/* Home */}
-        <button 
-          onClick={scrollToTop}
-          className="flex flex-col items-center gap-1 hover:text-black transition-colors group py-1"
-        >
-          <Home size={22} strokeWidth={1.5} className="group-active:scale-90 transition-transform" />
-        </button>
+        <NavItem 
+          icon={Home} 
+          label="Home" 
+          onClick={scrollToTop} 
+        />
 
-        {/* Collections */}
-        <button 
-          onClick={scrollToCollection}
-          className="flex flex-col items-center gap-1 hover:text-black transition-colors group py-1"
-        >
-          <LayoutGrid size={22} strokeWidth={1.5} className="group-active:scale-90 transition-transform" />
-        </button>
+        <NavItem 
+          icon={LayoutGrid} 
+          label="Shop" 
+          onClick={scrollToCollection} 
+        />
 
-        {/* Cart - Floating Action Button Style */}
-        <button 
+        <NavItem 
+          icon={ShoppingBag} 
+          label="Cart" 
           onClick={onOpenCart}
-          className="relative flex flex-col items-center gap-1 group -mt-8"
-        >
-          <div className="bg-black text-white p-3.5 rounded-2xl shadow-xl shadow-black/20 group-active:scale-95 transition-transform relative border-[4px] border-white">
-            <ShoppingBag size={20} strokeWidth={2} />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
-                {cartCount}
-              </span>
-            )}
-          </div>
-        </button>
+          badge={cartCount}
+        />
 
-        {/* Menu */}
-        <button 
-          onClick={onOpenMenu}
-          className="flex flex-col items-center gap-1 hover:text-black transition-colors group py-1"
-        >
-          <Menu size={22} strokeWidth={1.5} className="group-active:scale-90 transition-transform" />
-        </button>
+        <NavItem 
+          icon={Menu} 
+          label="Menu" 
+          onClick={onOpenMenu} 
+        />
 
       </div>
     </div>
