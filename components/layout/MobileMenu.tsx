@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { X, ChevronRight, Instagram, Twitter, Facebook } from 'lucide-react';
+import { ShopifyImage } from '../ui/ShopifyImage';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -35,9 +36,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onNavigate }) 
           {/* Featured Banner */}
           <div className="p-5 pb-2">
             <div className="relative aspect-[2/1] rounded-xl overflow-hidden mb-6">
-              <img 
+              <ShopifyImage 
                 src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" 
                 alt="New Collection" 
+                sizes="350px"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/20" />

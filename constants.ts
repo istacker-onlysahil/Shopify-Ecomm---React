@@ -1,18 +1,15 @@
-import { ApiConfig } from './types';
 
-// WARNING: You are using an Admin Token in the browser.
-// Shopify often blocks these requests via CORS policy for security.
-// If data fails to load, the app will fallback to mock data automatically.
+import { ApiConfig } from './types';
 
 export const DEFAULT_CONFIG: ApiConfig = {
   domain: 'the-website-preview.myshopify.com',
   // User provided Admin Access Token
   accessToken: '8bae080f4c6605cd4fa7e4078dc491e7', 
-  // Set to false as this is an Admin/Private token
+  // Set to true for Storefront API, false for Admin
   isStorefrontToken: true, 
 };
 
-// Fallback data in case the API fails due to CORS (likely with Admin token)
+// Fallback data in case the API fails
 export const MOCK_PRODUCTS = [
   {
     node: {

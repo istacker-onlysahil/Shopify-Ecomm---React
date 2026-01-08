@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { X, Minus, Plus, ShoppingBag, Trash2, ArrowRight, ExternalLink } from 'lucide-react';
 import { CartItem } from '../types';
 import { DEFAULT_CONFIG } from '../constants';
+import { ShopifyImage } from './ui/ShopifyImage';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -88,9 +90,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                 {items.map((item, idx) => (
                   <li key={item.id} className="flex bg-white p-3 rounded-lg shadow-sm border border-gray-100 animate-slide-up" style={{ animationDelay: `${idx * 30}ms` }}>
                     <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-100 bg-gray-50">
-                      <img
+                      <ShopifyImage
                         src={item.image}
                         alt={item.title}
+                        width={96}
                         className="h-full w-full object-cover object-center"
                       />
                     </div>

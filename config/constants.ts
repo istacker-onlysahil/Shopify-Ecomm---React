@@ -1,15 +1,12 @@
 
 import { ApiConfig, ShopifyCollection } from '../types/index';
 
-// WARNING: You are using an Admin Token in the browser.
-// Shopify often blocks these requests via CORS policy for security.
-// If data fails to load, the app will fallback to mock data automatically.
-
+// Configuration for Shopify Storefront API
 export const DEFAULT_CONFIG: ApiConfig = {
   domain: 'the-website-preview.myshopify.com',
   // User provided Admin Access Token
   accessToken: '8bae080f4c6605cd4fa7e4078dc491e7', 
-  // Set to false as this is an Admin/Private token
+  // Set to true for Storefront API, false for Admin API
   isStorefrontToken: true, 
 };
 

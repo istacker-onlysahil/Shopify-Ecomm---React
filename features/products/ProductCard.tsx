@@ -4,6 +4,7 @@ import { Heart, Loader2 } from 'lucide-react';
 import { ShopifyProduct } from '../../types/index';
 import { CustomCartIcon } from '../../components/icons/CustomCartIcon';
 import { Select } from '../../components/ui/Select';
+import { ShopifyImage } from '../../components/ui/ShopifyImage';
 
 interface ProductCardProps {
   product: ShopifyProduct;
@@ -25,16 +26,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
 
   const [isAdding, setIsAdding] = useState(false);
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAvailable) return;
     
+    // Set loading state briefly for visual feedback
     setIsAdding(true);
-    // Simulate a very brief network delay for visual feedback
-    await new Promise(resolve => setTimeout(resolve, 200));
     
+    // Execute instantly
     onAddToCart(product, selectedVariantId);
-    setIsAdding(false);
+    
+    // Reset state after a very small frame to show the transition
+    setTimeout(() => setIsAdding(false), 300);
   };
 
   // Pricing Logic
@@ -67,10 +70,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
     >
       {/* Image Container - Fully Rounded to match button style */}
       <div className="relative aspect-[3/4] bg-gray-50 overflow-hidden rounded-xl border border-gray-100/50 shadow-sm transition-all duration-300 hover:shadow-md">
-        <img
+        <ShopifyImage
           src={featuredImage?.url || 'https://picsum.photos/400/500'}
           alt={featuredImage?.altText || title}
-          loading="lazy"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110"
         />
         
@@ -95,16 +98,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         <button 
              onClick={handleAddToCart}
              disabled={!isAvailable || isAdding}
-             className={`md:hidden absolute bottom-2 right-2 z-30 flex items-center justify-center w-10 h-8 rounded-lg shadow-lg transition-transform active:scale-95 border border-white/10 ${
-                isAvailable 
-                ? 'bg-black text-white' 
-                : 'bg-gray-200 text-gray-400'
+             className={`md:hidden absolute bottom-2 right-2 z-30 flex items-center justify-center w-10 h-8 rounded-lg shadow-lg transition-colors duration-200 active:scale-95 border border-gray-100 ${
+                !isAvailable 
+                ? 'bg-gray-200 text-gray-400' 
+                : isAdding
+                    ? 'bg-black text-white' // Clicked State: Black
+                    : 'bg-white text-black' // Default State: White
              }`}
            >
               {isAdding ? (
-                 <Loader2 size={12} className="animate-spin" />
+                 <Loader2 size={12} className="animate-spin text-white" />
               ) : (
-                 <CustomCartIcon className={`w-4 h-4 ${isAvailable ? 'text-white' : 'text-gray-400'}`} />
+                 <CustomCartIcon className={`w-4 h-4 ${!isAvailable ? 'text-gray-400' : 'text-black'}`} />
               )}
         </button>
 

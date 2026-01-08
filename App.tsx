@@ -13,6 +13,7 @@ import Navbar from './components/layout/Navbar';
 import MobileMenu from './components/layout/MobileMenu';
 import MobileDock from './components/layout/MobileDock';
 import Footer from './components/layout/Footer';
+import { Reveal } from './components/ui/Reveal';
 
 // Features
 import HeroSection from './features/landing/HeroSection';
@@ -134,7 +135,7 @@ const App: React.FC = () => {
             />
           </div>
         ) : (
-          <div key="landing" className="animate-fade-in">
+          <div key="landing">
             <HeroSection />
             <CategorySection />
             
@@ -152,16 +153,18 @@ const App: React.FC = () => {
             {/* "You might also like" Section (Reuse Products) */}
             {flatProducts.length > 0 && (
               <section className="py-6 md:py-12 max-w-[1440px] mx-auto px-2 md:px-8">
-                <h2 className="text-lg md:text-3xl font-medium text-gray-900 mb-4 md:mb-12 pl-1">You might also like</h2>
+                <Reveal>
+                  <h2 className="text-lg md:text-3xl font-medium text-gray-900 mb-4 md:mb-12 pl-1">You might also like</h2>
+                </Reveal>
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-x-6 md:gap-y-10">
                   {flatProducts.slice(0, 5).map((product, idx) => (
-                      <div key={`like-${idx}`} className="animate-fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
+                      <Reveal key={`like-${idx}`} delay={idx * 50}>
                         <ProductCard 
                           product={product} 
                           onAddToCart={handleAddToCart}
                           onClick={setSelectedProduct}
                         />
-                      </div>
+                      </Reveal>
                   ))}
                 </div>
               </section>

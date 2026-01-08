@@ -27,15 +27,18 @@
             },
             transitionTimingFunction: {
               'buttery': 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+              'snappy': 'cubic-bezier(0.16, 1, 0.3, 1)',
             },
             animation: {
-              'fade-in': 'fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'slide-in-right': 'slideInRight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'scale-in': 'scaleIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'slide-down': 'slideDown 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              'slide-up': 'slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'fade-in': 'fadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'fade-in-up': 'fadeInUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'slide-in-right': 'slideInRight 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'scale-in': 'scaleIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'slide-down': 'slideDown 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+              'slide-up': 'slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
               'shimmer': 'shimmer 2s linear infinite',
+              /* Updated: Duration increased to 1.2s for extra slow blur. */
+              'blur-in': 'blurIn 1.2s cubic-bezier(0.25, 1, 0.3, 1) both',
             },
             keyframes: {
               fadeIn: {
@@ -43,7 +46,7 @@
                 '100%': { opacity: '1' },
               },
               fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '0%': { opacity: '0', transform: 'translateY(15px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               slideInRight: {
@@ -65,6 +68,14 @@
               shimmer: {
                 '0%': { transform: 'translateX(-100%)' },
                 '100%': { transform: 'translateX(100%)' }
+              },
+              blurIn: {
+                /* Start: Deep (40px) and blurry */
+                '0%': { opacity: '0', filter: 'blur(10px)', transform: 'translateY(40px)' },
+                /* 25%: Very Fast move up (approx 0.3s) to near-final position, opacity full, blur still active */
+                '25%': { opacity: '1', transform: 'translateY(6px)', filter: 'blur(4px)' },
+                /* 100%: Long slow settle for the last 6px and final blur clear over the remaining 0.9s */
+                '100%': { opacity: '1', filter: 'blur(0)', transform: 'translateY(0)' }
               }
             }
           }

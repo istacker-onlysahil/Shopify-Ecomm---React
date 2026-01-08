@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { ShoppingCart, Plus } from 'lucide-react';
 import { ShopifyProduct } from '../types';
+import { ShopifyImage } from './ui/ShopifyImage';
 
 interface ProductCardProps {
   product: ShopifyProduct;
@@ -19,10 +21,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         className="aspect-[4/5] bg-gray-100 overflow-hidden relative cursor-pointer rounded-sm"
         onClick={() => onClick(product)}
       >
-        <img
+        <ShopifyImage
           src={featuredImage?.url || 'https://picsum.photos/400/500'}
           alt={featuredImage?.altText || title}
-          loading="lazy"
+          sizes="(max-width: 768px) 50vw, 33vw"
           className="h-full w-full object-cover object-center transition-transform duration-300 ease-buttery group-hover:scale-105"
         />
         

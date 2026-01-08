@@ -45,7 +45,8 @@ const MobileDock: React.FC<MobileDockProps> = ({ onOpenCart, onOpenMenu, cartCou
 
   return (
     <div className="fixed bottom-2 inset-x-0 z-50 flex justify-center pointer-events-none md:hidden animate-slide-up">
-      <div className="pointer-events-auto bg-white/75 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl px-6 py-2.5 flex items-center justify-between w-[94%] max-w-[380px]">
+      {/* Updated background to bg-white/90 for a whiter glass effect */}
+      <div className="pointer-events-auto bg-white/90 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.1)] rounded-2xl px-6 py-2.5 flex items-center justify-between w-[94%] max-w-[380px]">
         
         <NavItem 
           icon={Home} 
