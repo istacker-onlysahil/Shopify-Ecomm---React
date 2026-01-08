@@ -25,6 +25,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
   // Animation States
   const [isAnimating, setIsAnimating] = useState(!!originRect);
   // New state: Controls when the real content (TEXT ONLY) becomes visible
+  // If no originRect (direct load), show content immediately (true). If animating, start hidden (false).
   const [showRealContent, setShowRealContent] = useState(!originRect);
   const [animStyle, setAnimStyle] = useState<React.CSSProperties>({});
   const placeholderRef = useRef<HTMLDivElement>(null);
@@ -100,24 +101,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
             height: destRect.height,
             zIndex: 9999,
             borderRadius: '1rem', // Always rounded-2xl for consistency
-            // OPTIMIZATION: Super super fast transition (0.25s)
-            transition: 'all 0.25s cubic-bezier(0.19, 1, 0.22, 1)', 
+            // OPTIMIZATION: Super fast transition (0.3s)
+            transition: 'all 0.3s cubic-bezier(0.19, 1, 0.22, 1)', 
             objectFit: 'cover'
           });
           
-          // 4. Reveal TEXT Content slightly BEFORE animation ends
+          // 4. Reveal TEXT Content immediately (in parallel with image flight)
           const revealTimeout = setTimeout(() => {
              setShowRealContent(true);
-          }, 50);
+          }, 30); // 30ms delay just to let the paint finish, effectively instant
 
-          // 5. Cleanup: Remove ghost with a LARGE SAFETY BUFFER
-          // We wait 500ms (animation is 250ms).
-          // This ensures the ghost stays FROZEN on top of the real image long enough
-          // for a slow phone to fully paint the real image underneath.
-          // The switch happens invisibly because the ghost and real image align perfectly.
+          // 5. Cleanup: Remove ghost with a buffer
           const cleanupTimeout = setTimeout(() => {
             setIsAnimating(false);
-          }, 500); 
+          }, 550); 
 
           return () => {
              clearTimeout(revealTimeout);
@@ -197,7 +194,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-4 md:pt-12 pb-24">
         
         {/* Back Button (Desktop Only) */}
-        <div className={`hidden md:block transition-opacity duration-300 delay-75 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`hidden md:block transition-opacity duration-300 ${!showRealContent ? 'opacity-0' : 'opacity-100'}`}>
           <button 
             onClick={onBack}
             className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-black mb-10 transition-colors group"
@@ -262,7 +259,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
               </div>
             
             {/* Desktop Thumbnails - Rounded XL */}
-            <div className={`hidden md:block transition-all duration-300 delay-75 ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+            <div className={`hidden md:block transition-all duration-300 ${!showRealContent ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
                 {allImages.length > 1 && (
                     <div className="flex gap-3 px-4 md:px-0 overflow-x-auto no-scrollbar py-2">
                     {allImages.map((img, idx) => (
@@ -286,7 +283,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
             </div>
           </div>
 
-          <div className={`lg:col-span-5 pt-6 lg:pt-0 lg:sticky lg:top-32 h-fit space-y-8 transition-all duration-300 ease-out delay-75 ${isAnimating ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'}`}>
+          <div className={`lg:col-span-5 pt-6 lg:pt-0 lg:sticky lg:top-32 h-fit space-y-8 transition-all duration-300 ease-out ${!showRealContent ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
               <div className="space-y-4">
                 <div className="flex justify-between items-start gap-4">
                   <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 leading-[1.1]">
