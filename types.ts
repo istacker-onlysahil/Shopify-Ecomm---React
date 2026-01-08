@@ -1,0 +1,60 @@
+
+export interface ShopifyImage {
+  url: string;
+  altText: string | null;
+}
+
+export interface ShopifyPrice {
+  amount: string;
+  currencyCode: string;
+}
+
+export interface ShopifyVariant {
+  id: string;
+  title: string;
+  price: ShopifyPrice;
+  availableForSale: boolean;
+}
+
+export interface ShopifyProduct {
+  id: string;
+  title: string;
+  description: string;
+  descriptionHtml?: string;
+  handle: string;
+  featuredImage: ShopifyImage | null;
+  images: {
+    edges: Array<{ node: ShopifyImage }>;
+  };
+  variants: {
+    edges: Array<{ node: ShopifyVariant }>;
+  };
+  priceRange: {
+    minVariantPrice: ShopifyPrice;
+  };
+}
+
+export interface CartItem {
+  id: string; // Variant ID
+  productId: string;
+  title: string;
+  variantTitle: string;
+  price: number;
+  currency: string;
+  image: string;
+  quantity: number;
+}
+
+export interface ApiConfig {
+  domain: string;
+  accessToken: string;
+  isStorefrontToken: boolean; // True = Storefront API, False = Admin API
+}
+
+export type ToastType = 'success' | 'error' | 'info';
+
+export interface ToastMessage {
+  id: string;
+  message: string;
+  type: ToastType;
+}

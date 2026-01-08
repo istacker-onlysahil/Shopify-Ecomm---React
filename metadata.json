@@ -1,0 +1,5 @@
+{
+  "name": "Shopify Ecomm - React",
+  "description": "A high-conversion landing page fetching products via Shopify GraphQL API. Handles Admin/Storefront token contexts with automatic fallback to demo data.",
+  "requestFramePermissions": []
+}
