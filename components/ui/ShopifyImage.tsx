@@ -26,19 +26,17 @@ export const getOptimizedImageUrl = (src: string, width: number, crop?: string) 
     // 1. Handle Unsplash URLs (For Demo Data)
     if (url.hostname.includes('unsplash.com')) {
       url.searchParams.set('w', width.toString());
-      url.searchParams.set('q', '80'); // Increased Quality to 80
-      url.searchParams.set('auto', 'format'); // WebP/AVIF
+      url.searchParams.set('q', '80'); 
+      url.searchParams.set('auto', 'format'); 
       url.searchParams.set('fit', 'crop');
       return url.toString();
     }
 
     // 2. Handle Shopify CDN URLs
-    // Shopify format: ?width=500&format=auto
     if (url.hostname.includes('cdn.shopify.com')) {
       url.searchParams.set('width', width.toString());
       url.searchParams.set('format', 'auto'); 
-      // Use webp/avif automatically via 'auto'
-      url.searchParams.set('quality', '80'); // Increased Quality to 80
+      url.searchParams.set('quality', '80');
       if (crop) {
         url.searchParams.set('crop', crop);
       }
@@ -48,7 +46,6 @@ export const getOptimizedImageUrl = (src: string, width: number, crop?: string) 
     // Return original if not recognized CDN
     return src;
   } catch (e) {
-    // Fallback for relative paths or invalid URLs
     return src;
   }
 };
@@ -58,7 +55,7 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
   alt,
   width,
   height,
-  sizes = '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw', // Default responsive guess
+  sizes = '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw', 
   priority = false,
   className = '',
   crop,
@@ -74,8 +71,7 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
     setHasError(false);
   }, [src]);
 
-  // FIX: Check if image is already cached/complete
-  // This solves the issue where cached images don't trigger onLoad
+  // Check if image is already cached/complete
   useEffect(() => {
     if (imgRef.current && imgRef.current.complete) {
       setIsLoaded(true);
@@ -84,11 +80,8 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
 
   if (!src) return <div className={`bg-gray-100 flex items-center justify-center ${className}`}><ImageOff className="text-gray-300" size={24} /></div>;
 
-  // Optimized widths for Shopify CDN Cache hits. 
-  // Includes standard mobile sizes (165, 360) to prevent fetching 600px+ images on small screens.
+  // 1. Generate High-Res SrcSet
   const targetWidths = [165, 360, 533, 720, 940, 1066, 1280, 1500, 1920, 2560];
-
-  // If error occurred, don't use optimized URLs, try raw src
   const srcSet = hasError 
     ? undefined 
     : targetWidths
@@ -98,25 +91,45 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
         })
         .join(', ');
 
-  // Generate a fallback src (usually a middle-ground size)
-  const defaultSrc = hasError ? src : getOptimizedImageUrl(src, 600, crop);
+  const highResSrc = hasError ? src : getOptimizedImageUrl(src, 600, crop);
 
-  // PERFORMANCE: If priority is true, or loaded, show immediately.
-  const shouldShowImmediately = priority || isLoaded || hasError;
+  // 2. Generate Low-Res Placeholder (20px width)
+  // This downloads instantly and acts as the "blur base"
+  const placeholderSrc = hasError ? null : getOptimizedImageUrl(src, 20, crop);
+
+  // If we couldn't optimize the URL (it returned the original), don't show the placeholder
+  // to prevent double downloading the heavy image.
+  const showPlaceholder = placeholderSrc && placeholderSrc !== src;
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={`relative overflow-hidden bg-gray-100 ${className}`}>
+      
       {/* 
-        FIX: Always show skeleton if not loaded, regardless of priority. 
-        This prevents empty container flash when high-res priority images are still fetching. 
+         LAYER 1: The "Blur Up" Placeholder
+         - Fetches a tiny 20px image.
+         - Scales it up 110% to hide blurred edges.
+         - Blurs it heavily.
+         - Stays visible until high-res loads.
       */}
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse z-0" />
+      {showPlaceholder && !hasError && (
+        <img
+          src={placeholderSrc}
+          alt=""
+          aria-hidden="true"
+          className={`absolute inset-0 w-full h-full object-cover filter blur-xl scale-110 transition-opacity duration-700 ${
+            isLoaded ? 'opacity-0' : 'opacity-100'
+          }`}
+        />
       )}
       
+      {/* 
+         LAYER 2: The High Quality Image
+         - Loads on top.
+         - Transitions opacity from 0 to 100 when loaded.
+      */}
       <img
         ref={imgRef}
-        src={defaultSrc}
+        src={highResSrc}
         srcSet={srcSet}
         sizes={sizes}
         alt={alt}
@@ -125,13 +138,13 @@ export const ShopifyImage: React.FC<ShopifyImageProps> = ({
         loading={priority ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : 'auto'}
         decoding={priority ? 'sync' : 'async'}
-        className={`w-full h-full object-cover relative z-10 transition-opacity duration-500 ease-out ${
-           shouldShowImmediately ? 'opacity-100' : 'opacity-0'
+        className={`w-full h-full object-cover relative z-10 transition-opacity duration-700 ease-out ${
+           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
         onLoad={() => setIsLoaded(true)}
         onError={() => {
           setHasError(true);
-          setIsLoaded(true); // Force visibility to show browser's broken image icon or fallback
+          setIsLoaded(true); 
         }}
         {...props}
       />

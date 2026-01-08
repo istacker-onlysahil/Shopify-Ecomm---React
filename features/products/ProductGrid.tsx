@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ShopifyCollection, ShopifyProduct, TransitionRect } from '../../types/index';
 import ProductCard from './ProductCard';
@@ -14,10 +14,9 @@ interface ProductGridProps {
 
 const ProductGrid: React.FC<ProductGridProps> = ({ collections, loading, onAddToCart, onSelectProduct }) => {
   const [activeTab, setActiveTab] = useState<string>('all');
-  const [displayedProducts, setDisplayedProducts] = useState<ShopifyProduct[]>([]);
 
   // Calculate "All" products (deduplicated)
-  const allProducts = React.useMemo(() => {
+  const allProducts = useMemo(() => {
     const map = new Map();
     collections.forEach(col => {
       col.products.forEach(prod => {
@@ -29,13 +28,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ collections, loading, onAddTo
     return Array.from(map.values());
   }, [collections]);
 
-  useEffect(() => {
+  // Derived state for displayed products
+  // Using useMemo instead of useEffect prevents stale-render cycles where activeTab updates but products haven't yet
+  const displayedProducts = useMemo(() => {
     if (activeTab === 'all') {
-      setDisplayedProducts(allProducts);
-    } else {
-      const selectedCollection = collections.find(c => c.id === activeTab);
-      setDisplayedProducts(selectedCollection ? selectedCollection.products : []);
+      return allProducts;
     }
+    const selectedCollection = collections.find(c => c.id === activeTab);
+    return selectedCollection ? selectedCollection.products : [];
   }, [activeTab, collections, allProducts]);
 
   return (
@@ -82,14 +82,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ collections, loading, onAddTo
           <p className="text-xs md:text-base text-gray-500 font-medium animate-pulse tracking-wide">Loading...</p>
         </div>
       ) : (
-        // OPTIMIZATION: User requested keeping 3 columns on mobile (grid-cols-3).
-        // Desktop scales up to 5 columns.
+        // Grid Container
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-x-6 md:gap-y-10 min-h-[400px]">
           {displayedProducts.length > 0 ? (
             displayedProducts.map((product, index) => (
               <Reveal 
+                // Combine Tab ID in key to force re-mount and animation replay on tab switch
                 key={`${activeTab}-${product.id}`} 
-                delay={(index % 5) * 50} // Stagger effect resets every row approx
+                delay={(index % 5) * 50} 
               >
                 <ProductCard 
                   product={product} 
@@ -100,7 +100,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ collections, loading, onAddTo
             ))
           ) : (
              <div className="col-span-full text-center py-12 text-gray-400 text-sm">
-                No products found.
+                No products found in this collection.
              </div>
           )}
         </div>

@@ -14,35 +14,45 @@ export const Reveal: React.FC<RevealProps> = ({
   width = '100%', 
   className = "", 
   delay = 0,
-  threshold = 0.05 
+  threshold = 0.01 // Reduced threshold for easier triggering
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Capture ref for cleanup
+    const currentRef = ref.current;
+    
+    // Check if IntersectionObserver is supported
+    if (!('IntersectionObserver' in window)) {
+        setIsVisible(true);
+        return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          if (ref.current) {
-            observer.unobserve(ref.current);
+          if (currentRef) {
+            observer.unobserve(currentRef);
           }
         }
       },
       {
         root: null,
-        rootMargin: '0px 0px -20px 0px', 
+        // Removed negative margin which might prevent items at bottom edge from appearing
+        rootMargin: '0px', 
         threshold: threshold,
       }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [threshold]);
@@ -50,7 +60,6 @@ export const Reveal: React.FC<RevealProps> = ({
   return (
     <div 
       ref={ref} 
-      // Added 'will-change-transform' to hint browser about impending animation
       className={`${className} will-change-transform ${isVisible ? 'animate-blur-in' : 'opacity-0 translate-y-[20px]'}`}
       style={{ 
         width, 

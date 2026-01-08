@@ -201,7 +201,7 @@ const App: React.FC = () => {
                           <ProductCard 
                             product={product} 
                             onAddToCart={handleAddToCart}
-                            onClick={(p) => handleProductSelect(p)} // Simplified click for suggested items for now
+                            onClick={handleProductSelect}
                           />
                         </Reveal>
                     ))}
