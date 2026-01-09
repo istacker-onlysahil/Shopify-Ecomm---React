@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <meta name="description" content="Nextgen Fashion - Premium apparel and accessories for the modern lifestyle.">
     <meta name="theme-color" content="#ffffff">
     <title>Nextgen | Premium Fashion Store</title>
@@ -29,8 +29,10 @@
             },
             colors: {
               primary: '#1a1a1a',
-              secondary: '#6b7280',
-              accent: '#d97706',
+              // Darkened from #6b7280 to ensure > 4.5:1 contrast on white
+              secondary: '#4b5563', 
+              // Darkened from #d97706 to #b45309 for better text contrast
+              accent: '#b45309',
               surface: '#f9fafb',
             },
             transitionTimingFunction: {

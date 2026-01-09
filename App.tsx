@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 
 // Types & Services
@@ -162,7 +163,8 @@ const StorefrontApp: React.FC = () => {
         cartCount={cartCount}
       />
 
-      <div className="relative">
+      {/* Semantic Main Landmark for Accessibility */}
+      <main className="relative" id="main-content" role="main">
         {selectedProduct ? (
           // IMPORTANT: Removed 'animate-fade-in' class to allow ProductDetail to handle its own shared element transition without opacity conflicts
           <div key="detail">
@@ -215,7 +217,7 @@ const StorefrontApp: React.FC = () => {
             </Suspense>
           </div>
         )}
-      </div>
+      </main>
 
       {!selectedProduct && (
         <Suspense fallback={null}>

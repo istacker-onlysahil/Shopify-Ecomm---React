@@ -92,26 +92,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
           src={featuredImage?.url || 'https://picsum.photos/400/500'}
           alt={featuredImage?.altText || title}
           // OPTIMIZATION FIXED: Significantly increased sizing to prevent blurriness on Retina screens.
-          // Mobile: 60vw (oversampled for sharpness on 3-col grid)
-          // Tablet: 40vw
-          // Desktop: 30vw
           sizes="(max-width: 640px) 60vw, (max-width: 1024px) 40vw, 30vw"
           className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-110"
         />
         
         {/* Discount Badge - Hugs the corner */}
         {isAvailable && (
-          <div className="absolute top-0 left-0 bg-red-500 text-white text-[10px] md:text-[11px] font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-br-xl shadow-sm z-20">
+          <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] md:text-[11px] font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-br-xl shadow-sm z-20">
             -{discountPercentage}%
           </div>
         )}
 
         {/* Wishlist Button */}
         <button 
-          className="absolute top-2 right-2 md:top-2.5 md:right-2.5 p-1.5 bg-white/90 backdrop-blur-sm rounded-full text-gray-400 hover:bg-white hover:text-red-500 transition-colors z-20 shadow-sm"
+          className="absolute top-2 right-2 md:top-2.5 md:right-2.5 p-1.5 bg-white/90 backdrop-blur-sm rounded-full text-gray-400 hover:bg-white hover:text-red-500 transition-colors z-20 shadow-sm min-w-[32px] min-h-[32px] flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
           }}
+          aria-label="Add to wishlist"
         >
           <Heart size={16} className="md:w-5 md:h-5" />
         </button>
@@ -120,13 +118,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         <button 
              onClick={handleAddToCart}
              disabled={!isAvailable || isAdding}
-             className={`md:hidden absolute bottom-2 right-2 z-30 flex items-center justify-center w-10 h-8 rounded-lg shadow-lg transition-colors duration-200 active:scale-95 border border-gray-100 ${
+             className={`md:hidden absolute bottom-2 right-2 z-30 flex items-center justify-center w-10 h-10 rounded-lg shadow-lg transition-colors duration-200 active:scale-95 border border-gray-100 ${
                 !isAvailable 
                 ? 'bg-gray-200 text-gray-400' 
                 : isAdding
                     ? 'bg-black text-white' // Clicked State: Black
                     : 'bg-white text-black' // Default State: White
              }`}
+             aria-label={isAvailable ? `Add ${title} to cart` : "Out of stock"}
            >
               {isAdding ? (
                  <Loader2 size={12} className="animate-spin text-white" />
@@ -172,7 +171,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
                 />
             ) : (
                 <div className="flex items-center h-full">
-                    <span className="inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-[10px] font-medium bg-gray-50 text-gray-400 border border-gray-100">
+                    <span className="inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-[10px] font-medium bg-gray-50 text-gray-500 border border-gray-100">
                       One Size
                     </span>
                 </div>
@@ -184,7 +183,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
             <span className="text-sm md:text-base font-bold text-gray-900">
                 {formattedPrice}
             </span>
-            <span className="text-[10px] md:text-[11px] text-gray-400 line-through font-medium">
+            <span className="text-[10px] md:text-[11px] text-gray-500 line-through font-medium">
                 {formattedComparePrice}
             </span>
         </div>

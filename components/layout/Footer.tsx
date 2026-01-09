@@ -14,6 +14,7 @@ const Footer: React.FC = () => {
       <button 
         onClick={() => toggleSection(title)}
         className="flex items-center justify-between w-full py-4 md:py-0 md:mb-6 text-left group"
+        aria-expanded={openSection === title}
       >
         <h4 className="font-bold text-xs uppercase tracking-widest text-white">{title}</h4>
         <ChevronDown 
@@ -26,7 +27,7 @@ const Footer: React.FC = () => {
       }`}>
         {links.map((link) => (
           <li key={link}>
-            <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors duration-200 block">
+            <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors duration-200 block py-1">
               {link}
             </a>
           </li>
@@ -49,8 +50,18 @@ const Footer: React.FC = () => {
                Crafting premium apparel that transcends trends. We believe in sustainable fashion, exceptional quality, and designs that empower your everyday life.
              </p>
              <div className="flex gap-4 pt-4">
-                {[Twitter, Facebook, Instagram, Github].map((Icon, idx) => (
-                  <a key={idx} href="#" className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-black hover:border-white transition-all duration-300">
+                {[
+                  { Icon: Twitter, label: 'Twitter' }, 
+                  { Icon: Facebook, label: 'Facebook' }, 
+                  { Icon: Instagram, label: 'Instagram' }, 
+                  { Icon: Github, label: 'Github' }
+                ].map(({ Icon, label }, idx) => (
+                  <a 
+                    key={idx} 
+                    href="#" 
+                    aria-label={label}
+                    className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-black hover:border-white transition-all duration-300"
+                  >
                     <Icon size={18} />
                   </a>
                 ))}
@@ -61,19 +72,21 @@ const Footer: React.FC = () => {
             <div className="bg-white/5 rounded-2xl p-6 md:p-10 border border-white/10">
               <h3 className="text-xl md:text-2xl font-serif font-medium mb-2">Join the Club</h3>
               <p className="text-gray-400 text-sm mb-6">Subscribe to receive updates, access to exclusive deals, and more.</p>
-              <div className="flex flex-col sm:flex-row gap-3">
+              <form className="flex flex-col sm:flex-row gap-3">
                  <div className="relative flex-1">
                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                   <label htmlFor="newsletter-email" className="sr-only">Email address</label>
                    <input 
+                     id="newsletter-email"
                      type="email" 
                      placeholder="Enter your email address" 
                      className="w-full bg-black/30 border border-white/10 rounded-full py-3.5 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all placeholder:text-gray-600"
                    />
                  </div>
-                 <button className="bg-white text-black px-8 py-3.5 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                 <button type="submit" className="bg-white text-black px-8 py-3.5 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
                    Subscribe <ArrowRight size={16} />
                  </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>

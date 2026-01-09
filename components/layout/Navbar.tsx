@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, Menu, User, LogOut } from 'lucide-react';
 import { CustomCartIcon } from '../icons/CustomCartIcon';
@@ -71,7 +72,8 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-4 flex-1">
               <button 
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+                className="lg:hidden p-2 -ml-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Open menu"
               >
                 <Menu size={20} strokeWidth={1.5} />
               </button>
@@ -104,17 +106,22 @@ const Navbar: React.FC<NavbarProps> = ({
                 <input 
                   type="text" 
                   placeholder="Search products..." 
+                  aria-label="Search products"
                   className="w-0 group-hover:w-48 focus:w-48 transition-all duration-300 border-b border-gray-300 focus:border-black bg-transparent py-1 px-2 text-sm outline-none placeholder:text-gray-400"
                 />
-                <button className="p-2 hover:bg-gray-100 rounded-full text-gray-900">
+                <button 
+                  className="p-2 hover:bg-gray-100 rounded-full text-gray-900 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="Search"
+                >
                   <Search size={20} strokeWidth={1.5} />
                 </button>
               </div>
 
               {/* Mobile Search Toggle */}
               <button 
-                className="md:hidden p-2 text-gray-900 hover:bg-gray-100 rounded-full"
+                className="md:hidden p-2 text-gray-900 hover:bg-gray-100 rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center"
                 onClick={() => setShowSearch(!showSearch)}
+                aria-label="Toggle search"
               >
                 <Search size={20} strokeWidth={1.5} />
               </button>
@@ -123,7 +130,8 @@ const Navbar: React.FC<NavbarProps> = ({
               <div className="relative hidden md:block">
                 <button 
                   onClick={handleUserClick}
-                  className={`p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center gap-2 ${isAuthenticated ? 'text-black font-medium' : 'text-gray-900'}`}
+                  className={`p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center gap-2 min-h-[44px] ${isAuthenticated ? 'text-black font-medium' : 'text-gray-900'}`}
+                  aria-label={isAuthenticated ? "My Account" : "Login"}
                 >
                   <User size={20} strokeWidth={1.5} />
                   {isAuthenticated && <span className="text-xs uppercase font-bold">{customer?.firstName}</span>}
@@ -149,7 +157,8 @@ const Navbar: React.FC<NavbarProps> = ({
               {/* Cart */}
               <button 
                 onClick={() => setCartOpen(true)}
-                className="relative p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors group"
+                className="relative p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors group min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label={`Open cart, ${cartCount} items`}
               >
                 <CustomCartIcon className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5px]" />
                 {cartCount > 0 && (
@@ -171,6 +180,7 @@ const Navbar: React.FC<NavbarProps> = ({
               <input 
                 type="text" 
                 placeholder="Search..." 
+                aria-label="Search"
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                 autoFocus={showSearch}
               />

@@ -68,22 +68,29 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
       <div 
         className="absolute inset-0 bg-black/30 backdrop-blur-[4px] transition-opacity duration-300 animate-fade-in" 
         onClick={onClose}
+        aria-hidden="true"
       />
       
       {/* Drawer Container */}
-      <div className="absolute inset-y-0 right-0 max-w-full flex pointer-events-none">
+      <div 
+        className="absolute inset-y-0 right-0 max-w-full flex pointer-events-none"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-heading"
+      >
         <div className="pointer-events-auto w-full md:w-[480px] bg-white shadow-2xl flex flex-col h-full transform transition-transform duration-300 ease-out animate-slide-in-right">
           
           {/* --- Header --- */}
           <div className="px-4 py-4 md:px-6 md:py-5 border-b border-gray-100 bg-white z-10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl md:text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
+              <h2 id="cart-heading" className="text-xl md:text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
                 Cart
                 <span className="text-xs font-bold text-white bg-black px-2 py-0.5 rounded-full">{items.length}</span>
               </h2>
               <button 
                 onClick={onClose}
-                className="p-2 -mr-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                className="p-2 -mr-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Close cart"
               >
                 <X size={20} />
               </button>
@@ -166,7 +173,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                                         className="h-6 text-[10px] md:text-xs py-0"
                                     />
                                 ) : (
-                                    <p className="text-xs text-gray-500 font-medium bg-gray-50 inline-block px-1.5 py-0.5 rounded border border-gray-100">
+                                    <p className="text-xs text-gray-600 font-medium bg-gray-50 inline-block px-1.5 py-0.5 rounded border border-gray-100">
                                         {item.variantTitle !== 'Default Title' ? item.variantTitle : 'One Size'}
                                     </p>
                                 )}
@@ -178,15 +185,17 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                           <div className="flex items-center border border-gray-200 rounded-md px-1 py-0.5 bg-white shadow-sm h-8">
                             <button 
                               onClick={() => onUpdateQuantity(item.id, -1)}
-                              className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 rounded-sm transition-colors disabled:opacity-30"
+                              className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 rounded-sm transition-colors disabled:opacity-30 min-w-[32px]"
                               disabled={item.quantity <= 1}
+                              aria-label="Decrease quantity"
                             >
                               <Minus size={12} />
                             </button>
                             <span className="w-6 text-center text-xs font-bold tabular-nums">{item.quantity}</span>
                             <button 
                               onClick={() => onUpdateQuantity(item.id, 1)}
-                              className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 rounded-sm transition-colors"
+                              className="w-7 h-full flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-50 rounded-sm transition-colors min-w-[32px]"
+                              aria-label="Increase quantity"
                             >
                               <Plus size={12} />
                             </button>
@@ -195,7 +204,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                           {/* Remove */}
                           <button
                             onClick={() => onRemove(item.id)}
-                            className="text-gray-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition-all opacity-100 md:opacity-0 group-hover:opacity-100"
+                            className="text-gray-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition-all opacity-100 md:opacity-0 group-hover:opacity-100 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            aria-label={`Remove ${item.title}`}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -219,9 +229,12 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                          </div>
                          <div className="flex-1 min-w-0">
                            <p className="text-sm font-semibold text-gray-900 truncate">{upsell.title}</p>
-                           <p className="text-xs text-gray-500">{formatPrice(upsell.price)}</p>
+                           <p className="text-xs text-gray-600">{formatPrice(upsell.price)}</p>
                          </div>
-                         <button className="h-8 w-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-900 shadow-sm group-hover:bg-black group-hover:text-white group-hover:border-black transition-colors">
+                         <button 
+                           className="h-8 w-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-900 shadow-sm group-hover:bg-black group-hover:text-white group-hover:border-black transition-colors"
+                           aria-label={`Add ${upsell.title} to cart`}
+                         >
                            <Plus size={14} />
                          </button>
                       </div>
@@ -246,6 +259,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                              className="w-full text-xs p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-black focus:border-black outline-none bg-white resize-none"
                              rows={3}
                              placeholder="Special instructions for seller..."
+                             aria-label="Order Note"
                            />
                         </div>
                       )}
@@ -255,10 +269,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                    <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-white">
                       <Gift size={16} className="text-gray-400" />
                       <div className="flex-1">
-                        <p className="text-xs font-semibold text-gray-900">This order is a gift</p>
+                        <label htmlFor="gift-checkbox" className="text-xs font-semibold text-gray-900 block cursor-pointer">This order is a gift</label>
                         <p className="text-[10px] text-gray-500">Prices will be hidden on receipt</p>
                       </div>
-                      <input type="checkbox" className="rounded text-black focus:ring-black border-gray-300 h-4 w-4 cursor-pointer" />
+                      <input id="gift-checkbox" type="checkbox" className="rounded text-black focus:ring-black border-gray-300 h-4 w-4 cursor-pointer" />
                    </div>
                 </div>
 
@@ -278,6 +292,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                    onChange={(e) => setCouponCode(e.target.value)}
                    placeholder="Gift card or discount code"
                    className="w-full pl-9 pr-20 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black focus:bg-white transition-all"
+                   aria-label="Discount code"
                  />
                  <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                  <button 
