@@ -1,13 +1,12 @@
 
 import { ApiConfig, ShopifyCollection } from '../types/index';
 
-// Configuration for Shopify Storefront API
+// Configuration for Shopify Storefront or Admin API
 export const DEFAULT_CONFIG: ApiConfig = {
   domain: 'the-website-preview.myshopify.com',
-  // User provided Access Token
+  // User provided Admin Access Token
   accessToken: '8bae080f4c6605cd4fa7e4078dc491e7', 
-  // Set to true for Storefront API (public tokens), false for Admin API (private tokens starting with shpat_)
-  // User specified Admin Access Token, so we set this to false.
+  // Set to true for Admin API context (shpat_ or private tokens)
   isStorefrontToken: true, 
 };
 
@@ -38,34 +37,23 @@ export const MOCK_COLLECTIONS: ShopifyCollection[] = [
   {
     id: 'mock-col-1',
     title: 'New Arrivals',
+    handle: 'new-arrivals',
     products: [
-      createMockProduct('1', 'Casual Shirt', '225.00', 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=800', [
-        { node: { id: 'v1-s', title: 'Small', price: { amount: '225.00', currencyCode: 'USD' }, availableForSale: true } },
-        { node: { id: 'v1-m', title: 'Medium', price: { amount: '235.00', currencyCode: 'USD' }, availableForSale: true } },
-        { node: { id: 'v1-l', title: 'Large', price: { amount: '245.00', currencyCode: 'USD' }, availableForSale: true } }
-      ]),
-      createMockProduct('2', 'Chrono Watch', '125.00', 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800'),
-      createMockProduct('3', 'Cashmere Scarf', '125.00', 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800'),
-      createMockProduct('4', 'Ceramic Lamp', '125.00', 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?auto=format&fit=crop&q=80&w=800'),
+      createMockProduct('1', 'Sable Journey', '4200', 'https://whif.in/cdn/shop/files/SableJourney_1.jpg?v=1701254321&width=800'),
+      createMockProduct('2', 'Azure Spice', '4200', 'https://whif.in/cdn/shop/files/AzureSpice_1.jpg?v=1701254321&width=800'),
+      createMockProduct('3', 'Sky Zest', '4200', 'https://whif.in/cdn/shop/files/SkyZest_1.jpg?v=1701254321&width=800'),
+      createMockProduct('4', 'Creme Inferno', '4200', 'https://whif.in/cdn/shop/files/CremeInferno_1.jpg?v=1701254321&width=800'),
+      createMockProduct('5', 'Ocean Rush', '4200', 'https://whif.in/cdn/shop/files/OceanRush_1.jpg?v=1701254321&width=800'),
+      createMockProduct('6', 'Fresh Haze', '4200', 'https://whif.in/cdn/shop/files/FreshHaze_1.jpg?v=1701254321&width=800'),
     ]
   },
   {
     id: 'mock-col-2',
-    title: 'Winter Collection',
+    title: 'Fragrances',
+    handle: 'fragrances',
     products: [
-       createMockProduct('5', 'Premium Jacket', '125.00', 'https://images.unsplash.com/photo-1545291730-faff8ca1d4b0?auto=format&fit=crop&q=80&w=800'),
-       createMockProduct('6', 'Hoodie Winter', '25.00', 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800', [
-         { node: { id: 'v6-bk', title: 'Black', price: { amount: '25.00', currencyCode: 'USD' }, availableForSale: true } },
-         { node: { id: 'v6-bl', title: 'Blue', price: { amount: '25.00', currencyCode: 'USD' }, availableForSale: true } }
-       ]),
-    ]
-  },
-  {
-    id: 'mock-col-3',
-    title: 'Accessories',
-    products: [
-      createMockProduct('2', 'Chrono Watch', '125.00', 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800'),
-       createMockProduct('3', 'Cashmere Scarf', '125.00', 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800'),
+       createMockProduct('7', 'Premium Jacket', '125.00', 'https://images.unsplash.com/photo-1545291730-faff8ca1d4b0?auto=format&fit=crop&q=80&w=800'),
+       createMockProduct('8', 'Hoodie Winter', '25.00', 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800'),
     ]
   }
 ];

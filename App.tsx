@@ -15,6 +15,7 @@ import MobileMenu from './components/layout/MobileMenu';
 import MobileDock from './components/layout/MobileDock';
 import { Reveal } from './components/ui/Reveal';
 import AuthModal from './components/auth/AuthModal';
+import NotFound from './features/error/NotFound';
 
 // Eager Loaded Features (Above the fold)
 import HeroSection from './features/landing/HeroSection';
@@ -23,6 +24,7 @@ import ProductGrid from './features/products/ProductGrid';
 import ProductDetail from './features/products/ProductDetail';
 import ProductCard from './features/products/ProductCard';
 import CartDrawer from './features/cart/CartDrawer';
+import CollectionPage from './features/collections/CollectionPage';
 
 // Lazy Loaded Features (Below the fold) to reduce TBT
 const PromoBanner = lazy(() => import('./features/landing/PromoBanner'));
@@ -30,11 +32,8 @@ const ReviewsSection = lazy(() => import('./features/landing/ReviewsSection'));
 const NewsletterSection = lazy(() => import('./features/landing/NewsletterSection'));
 const Footer = lazy(() => import('./components/layout/Footer'));
 
-// --- Inner App Component that consumes AuthContext ---
 const StorefrontApp: React.FC = () => {
-  // State
   const [collections, setCollections] = useState<ShopifyCollection[]>([]);
-  // We need a flat list of products for the "You might also like" section
   const [flatProducts, setFlatProducts] = useState<ShopifyProduct[]>([]); 
   const [loading, setLoading] = useState(true);
   const [cartOpen, setCartOpen] = useState(false);
@@ -43,40 +42,75 @@ const StorefrontApp: React.FC = () => {
   
   // Selected Product & Transition State
   const [selectedProduct, setSelectedProduct] = useState<ShopifyProduct | null>(null);
+  const [selectedCollection, setSelectedCollection] = useState<ShopifyCollection | null>(null);
   const [transitionRect, setTransitionRect] = useState<TransitionRect | null>(null);
+  const [is404, setIs404] = useState(false);
   
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [config, setConfig] = useState<ApiConfig>(DEFAULT_CONFIG);
 
-  // Hooks
   const { cart, addToCart: addToCartHook, removeFromCart, updateQuantity, updateVariant, cartCount } = useCart();
 
-  // Effects
+  // Load Data
   useEffect(() => {
     loadData();
     
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll, { passive: true }); // Passive listener for scroll performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config]); 
+  }, [config]);
 
-  // --- Browser History / Back Button Handler ---
+  // Route Handling logic
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      // If the user presses the back button and we have a product open, close it.
-      if (selectedProduct) {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      
+      if (!hash || hash === '' || hash === '#') {
         setSelectedProduct(null);
+        setSelectedCollection(null);
+        setIs404(false);
+        return;
+      }
+
+      if (hash.startsWith('#product/')) {
+        const handle = hash.replace('#product/', '');
+        const found = flatProducts.find(p => p.handle === handle);
+        if (found) {
+          setSelectedProduct(found);
+          setSelectedCollection(null);
+          setIs404(false);
+        } else if (flatProducts.length > 0) {
+          setIs404(true);
+          setSelectedProduct(null);
+          setSelectedCollection(null);
+        }
+      } else if (hash.startsWith('#collection/')) {
+        const handle = hash.replace('#collection/', '');
+        const found = collections.find(c => c.handle === handle);
+        if (found) {
+          setSelectedCollection(found);
+          setSelectedProduct(null);
+          setIs404(false);
+        } else if (collections.length > 0) {
+          setIs404(true);
+          setSelectedCollection(null);
+          setSelectedProduct(null);
+        }
+      } else if (!hash.startsWith('#collection') && !hash.startsWith('#main-content')) {
+        setIs404(true);
+        setSelectedProduct(null);
+        setSelectedCollection(null);
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedProduct]);
+    window.addEventListener('popstate', handleHashChange);
+    handleHashChange(); 
 
-  // Handlers
+    return () => window.removeEventListener('popstate', handleHashChange);
+  }, [flatProducts, collections]);
+
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ id: Date.now().toString(), message, type });
   };
@@ -87,9 +121,7 @@ const StorefrontApp: React.FC = () => {
       const { collections: fetchedCollections, error } = await fetchShopifyCollections(config);
       setCollections(fetchedCollections);
       
-      // Flatten products for suggested items
       const all = fetchedCollections.flatMap(c => c.products);
-      // Deduplicate
       const uniqueProducts = Array.from(new Map(all.map(p => [p.id, p])).values());
       setFlatProducts(uniqueProducts);
 
@@ -107,80 +139,82 @@ const StorefrontApp: React.FC = () => {
     if (success) {
       showToast(`Added ${product.title} to bag`, 'success');
       setCartOpen(true);
-    } else {
-      showToast('Could not add item', 'error');
     }
   };
 
-  const handleMobileNav = () => {
-    setMobileMenuOpen(false);
-    // If a product is open when navigating via menu, just clear it
-    if (selectedProduct) {
-      window.history.back(); // Sync history
-    } else {
-      setSelectedProduct(null);
-    }
-  };
-  
   const handleProductSelect = (product: ShopifyProduct, rect?: TransitionRect) => {
+    if (!product) {
+      window.location.hash = '';
+      setSelectedProduct(null);
+      setSelectedCollection(null);
+      setIs404(false);
+      return;
+    }
     setTransitionRect(rect || null);
     setSelectedProduct(product);
-    // Push state to browser history so the "Back" button works
-    window.history.pushState({ productId: product.id }, '', `#product/${product.handle}`);
+    setSelectedCollection(null);
+    setIs404(false);
+    window.location.hash = `#product/${product.handle}`;
   };
 
-  const handleProductClose = () => {
-    // When clicking the UI back button, we go back in history.
-    // This triggers the 'popstate' event listener above, which then clears the selectedProduct.
-    window.history.back();
+  const handleBackToHome = () => {
+    window.location.hash = '';
+    setSelectedProduct(null);
+    setSelectedCollection(null);
+    setIs404(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-black selection:text-white pb-20 md:pb-0">
       <Toast toast={toast} onClose={() => setToast(null)} />
-      
       <AuthModal showToast={showToast} />
 
       <Navbar 
         isScrolled={isScrolled}
         selectedProduct={selectedProduct}
+        collections={collections}
         setMobileMenuOpen={setMobileMenuOpen}
-        setSelectedProduct={setSelectedProduct}
+        onSelectProduct={handleProductSelect}
         setCartOpen={setCartOpen}
         cartCount={cartCount}
       />
 
       <MobileMenu 
         isOpen={mobileMenuOpen}
+        collections={collections}
         onClose={() => setMobileMenuOpen(false)}
-        onNavigate={handleMobileNav}
+        onNavigate={() => setMobileMenuOpen(false)}
       />
 
-      {/* Mobile Floating Dock */}
       <MobileDock 
         onOpenCart={() => setCartOpen(true)}
         onOpenMenu={() => setMobileMenuOpen(true)}
         cartCount={cartCount}
       />
 
-      {/* Semantic Main Landmark for Accessibility */}
       <main className="relative" id="main-content" role="main">
-        {selectedProduct ? (
-          // IMPORTANT: Removed 'animate-fade-in' class to allow ProductDetail to handle its own shared element transition without opacity conflicts
-          <div key="detail">
-             <ProductDetail 
-              product={selectedProduct} 
-              originRect={transitionRect}
-              onBack={handleProductClose}
-              onAddToCart={handleAddToCart}
-            />
-          </div>
+        {is404 ? (
+          <NotFound onBack={handleBackToHome} />
+        ) : selectedProduct ? (
+          <ProductDetail 
+            product={selectedProduct} 
+            originRect={transitionRect}
+            onBack={handleBackToHome}
+            onAddToCart={handleAddToCart}
+          />
+        ) : selectedCollection ? (
+          <CollectionPage 
+            collection={selectedCollection}
+            allCollections={collections}
+            onBack={handleBackToHome}
+            onAddToCart={handleAddToCart}
+            onSelectProduct={handleProductSelect}
+          />
         ) : (
           <div key="landing">
             <HeroSection />
             <CategorySection />
-            
-            {/* Updated Grid with Collections support */}
             <ProductGrid 
               collections={collections}
               loading={loading}
@@ -188,12 +222,10 @@ const StorefrontApp: React.FC = () => {
               onSelectProduct={handleProductSelect}
             />
             
-            {/* Lazy Load Marketing Sections */}
             <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-black animate-spin" /></div>}>
               <PromoBanner />
               <ReviewsSection />
 
-              {/* "You might also like" Section (Reuse Products) */}
               {flatProducts.length > 0 && (
                 <section className="py-6 md:py-12 max-w-[1440px] mx-auto px-2 md:px-8">
                   <Reveal>
@@ -219,7 +251,7 @@ const StorefrontApp: React.FC = () => {
         )}
       </main>
 
-      {!selectedProduct && (
+      {(!selectedProduct && !is404) && (
         <Suspense fallback={null}>
           <Footer />
         </Suspense>
@@ -237,7 +269,6 @@ const StorefrontApp: React.FC = () => {
   );
 };
 
-// Root App Component wrapper
 const App: React.FC = () => {
   return (
     <AuthProvider>

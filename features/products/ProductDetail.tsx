@@ -1,10 +1,7 @@
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { ArrowLeft, ShoppingBag, Truck, Shield, ChevronDown, ChevronUp, Share2, Heart } from 'lucide-react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
+import { ArrowLeft, ShoppingBag, Truck, Shield, ChevronDown, ChevronUp, Heart, ChevronRight } from 'lucide-react';
 import { ShopifyProduct, TransitionRect } from '../../types/index';
-import { Reveal } from '../../components/ui/Reveal';
 import { ShopifyImage, getOptimizedImageUrl } from '../../components/ui/ShopifyImage';
 
 interface ProductDetailProps {
@@ -21,11 +18,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
   const [activeAccordion, setActiveAccordion] = useState<string | null>('details');
   const [isScrolledPastCTA, setIsScrolledPastCTA] = useState(false);
   const mainButtonRef = useRef<HTMLButtonElement>(null);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   
   // Animation States
   const [isAnimating, setIsAnimating] = useState(!!originRect);
-  // New state: Controls when the real content (TEXT ONLY) becomes visible
-  // If no originRect (direct load), show content immediately (true). If animating, start hidden (false).
   const [showRealContent, setShowRealContent] = useState(!originRect);
   const [animStyle, setAnimStyle] = useState<React.CSSProperties>({});
   const placeholderRef = useRef<HTMLDivElement>(null);
@@ -46,11 +42,30 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
     currency: price?.currencyCode || 'USD',
   }).format(parseFloat(price?.amount || '0'));
 
+  // --- Autoplay Logic ---
+  useEffect(() => {
+    if (!isAutoPlaying || allImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setSelectedImage((prev) => {
+        const currentIndex = allImages.findIndex(img => img.url === prev);
+        const nextIndex = (currentIndex + 1) % allImages.length;
+        return allImages[nextIndex].url;
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, allImages]);
+
+  const handleManualSelection = (url: string) => {
+    setSelectedImage(url);
+    setIsAutoPlaying(false); // Stop autoplay when user manually interacts
+  };
+
   // --- Scroll Lock during Animation ---
   useEffect(() => {
     if (isAnimating) {
       document.body.style.overflow = 'hidden';
-      // Prevent momentum scrolling on mobile
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
     } else {
@@ -67,32 +82,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
 
   // --- Animation Logic (FLIP) ---
   useLayoutEffect(() => {
-    // 1. Force Scroll to Top Immediately (Instant)
     window.scrollTo({ top: 0, behavior: 'auto' });
 
-    // If no origin, skip animation
     if (!originRect) return;
 
-    // 2. Initial State: Set ghost image to fixed position matching the card's original position
     setAnimStyle({
       position: 'fixed',
       top: originRect.top,
       left: originRect.left,
       width: originRect.width,
       height: originRect.height,
-      zIndex: 9999, // Fly OVER the global navbar
+      zIndex: 9999,
       borderRadius: '0.75rem', 
       transition: 'none',
       objectFit: 'cover'
     });
 
-    // 3. Animate to Destination
     const frameId = requestAnimationFrame(() => {
        requestAnimationFrame(() => {
           if (!placeholderRef.current) return;
           const destRect = placeholderRef.current.getBoundingClientRect();
 
-          // Enable transition and set new coordinates
           setAnimStyle({
             position: 'fixed',
             top: destRect.top,
@@ -100,18 +110,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
             width: destRect.width,
             height: destRect.height,
             zIndex: 9999,
-            borderRadius: '1rem', // Always rounded-2xl for consistency
-            // OPTIMIZATION: Super fast transition (0.3s)
+            borderRadius: '1.5rem', 
             transition: 'all 0.3s cubic-bezier(0.19, 1, 0.22, 1)', 
             objectFit: 'cover'
           });
           
-          // 4. Reveal TEXT Content immediately (in parallel with image flight)
           const revealTimeout = setTimeout(() => {
              setShowRealContent(true);
-          }, 30); // 30ms delay just to let the paint finish, effectively instant
+          }, 30); 
 
-          // 5. Cleanup: Remove ghost with a buffer
           const cleanupTimeout = setTimeout(() => {
             setIsAnimating(false);
           }, 550); 
@@ -158,7 +165,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
     </div>
   );
 
-  // PREPARE GHOST IMAGE
   const targetWidths = [165, 360, 533, 720, 940, 1066, 1280, 1500, 1920, 2560];
   const ghostSrcSet = targetWidths
       .map((w) => {
@@ -172,8 +178,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
 
   return (
     <div className="min-h-screen bg-white">
-      
-      {/* Ghost Image for Animation */}
       {isAnimating && (
         <div 
             style={animStyle} 
@@ -190,100 +194,65 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
         </div>
       )}
 
-      {/* Main Content - Added px-4 pt-4 on mobile to keep image inside page width */}
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-4 md:pt-12 pb-24">
         
-        {/* Back Button (Desktop Only) */}
-        <div className={`hidden md:block transition-opacity duration-300 ${!showRealContent ? 'opacity-0' : 'opacity-100'}`}>
-          <button 
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-black mb-10 transition-colors group"
-          >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Back to collection
-          </button>
+        {/* Breadcrumb Navigation */}
+        <div className={`mb-6 transition-opacity duration-300 ${!showRealContent ? 'opacity-0' : 'opacity-100'}`}>
+           <nav className="flex items-center gap-2 md:gap-3 text-[11px] md:text-sm text-gray-400 font-medium tracking-wide" aria-label="Breadcrumb">
+              <button onClick={onBack} className="hover:text-black transition-colors">Products</button>
+              <span className="text-gray-300">/</span>
+              <span className="hover:text-black cursor-pointer transition-colors">Collections</span>
+              <span className="text-gray-300">/</span>
+              <span className="hover:text-black cursor-pointer transition-colors">Featured</span>
+              <span className="text-gray-300">/</span>
+              <span className="text-gray-900 font-bold truncate">{title}</span>
+           </nav>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-16 gap-y-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-12 md:gap-x-16 gap-y-0">
           
-          <div className="lg:col-span-7 space-y-4">
-              {/* 
-                 Main Image Container
-                 CRITICAL FIX: Removed 'opacity' toggle. 
-                 This container is now ALWAYS visible (opacity-100).
-                 It sits BEHIND the ghost image during animation.
-                 This guarantees that when the ghost is removed, the image is ALREADY PAINTED.
-              */}
-              <div 
-                ref={placeholderRef}
-                className="relative bg-gray-50 overflow-hidden rounded-2xl opacity-100"
-              >
-                {/* Mobile: Swiper Slider */}
-                <div className="block md:hidden">
-                    <Swiper
-                        modules={[Pagination]}
-                        spaceBetween={0}
-                        slidesPerView={1}
-                        pagination={{ clickable: true }}
-                        className="aspect-[3/4] w-full"
-                    >
-                        {allImages.map((img, idx) => (
-                            <SwiperSlide key={idx}>
-                                <ShopifyImage 
-                                    src={img.url} 
-                                    alt={img.altText || title}
-                                    priority={idx === 0} 
-                                    sizes="100vw"
-                                    className="w-full h-full object-cover object-center"
-                                />
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                </div>
-
-                {/* Desktop: Single Image View */}
-                <div className="hidden md:block aspect-[4/5]">
-                     <ShopifyImage 
-                        src={selectedImage} 
-                        alt={title}
-                        priority={true}
-                        // Oversample slightly (60vw) to ensure crispness on high DPI screens
-                        sizes="(max-width: 768px) 100vw, 60vw"
-                        className="w-full h-full object-cover object-center"
-                    />
-                </div>
-
-                <button className="absolute bottom-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg md:hidden z-10">
-                  <Heart size={20} />
-                </button>
-              </div>
+          {/* Gallery Container - Thumbnails on Left, Main Image on Right */}
+          <div className="lg:col-span-7 flex flex-row gap-2 md:gap-4 h-fit max-h-[500px] md:max-h-[680px]">
             
-            {/* Desktop Thumbnails - Rounded XL */}
-            <div className={`hidden md:block transition-all duration-300 ${!showRealContent ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-                {allImages.length > 1 && (
-                    <div className="flex gap-3 px-4 md:px-0 overflow-x-auto no-scrollbar py-2">
-                    {allImages.map((img, idx) => (
-                        <button 
-                        key={idx}
-                        onClick={() => setSelectedImage(img.url)}
-                        className={`flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all ${
-                            selectedImage === img.url ? 'border-black shadow-md scale-105' : 'border-transparent opacity-60'
-                        }`}
-                        >
-                        <ShopifyImage 
-                            src={img.url} 
-                            alt=""
-                            width={100}
-                            className="w-full h-full object-cover" 
-                        />
-                        </button>
-                    ))}
-                    </div>
-                )}
+            {/* Left: Thumbnail Column - Restricted to ~4 thumbnails height with scrolling */}
+            <div className={`flex flex-col gap-2 md:gap-3 w-14 md:w-24 flex-shrink-0 transition-all duration-500 ease-out overflow-y-auto no-scrollbar scroll-smooth pr-1 ${!showRealContent ? 'opacity-0 -translate-x-4' : 'opacity-100 translate-x-0'}`}>
+               {allImages.map((img, idx) => (
+                 <button 
+                   key={idx}
+                   onClick={() => handleManualSelection(img.url)}
+                   className={`aspect-square md:aspect-[3/4] rounded-lg md:rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all duration-300 ${
+                     selectedImage === img.url ? 'border-gray-900 shadow-md ring-1 ring-gray-900 ring-offset-1' : 'border-transparent bg-gray-50 opacity-60 hover:opacity-100 hover:border-gray-200'
+                   }`}
+                 >
+                   <ShopifyImage src={img.url} alt="" sizes="100px" className="w-full h-full object-cover" />
+                 </button>
+               ))}
+            </div>
+
+            {/* Right: Main Product Image */}
+            <div 
+              ref={placeholderRef}
+              className="flex-1 relative bg-gray-50 overflow-hidden rounded-xl md:rounded-[2.5rem] shadow-sm transition-all duration-300 hover:shadow-lg"
+              onMouseEnter={() => setIsAutoPlaying(false)}
+              onMouseLeave={() => setIsAutoPlaying(true)}
+            >
+              <div className="aspect-[3/4] md:aspect-[4/5] w-full">
+                 <ShopifyImage 
+                    src={selectedImage} 
+                    alt={title}
+                    priority={true}
+                    sizes="(max-width: 768px) 100vw, 60vw"
+                    className="w-full h-full object-cover object-center"
+                />
+              </div>
+
+              <button className="absolute bottom-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg md:hidden z-10">
+                <Heart size={20} />
+              </button>
             </div>
           </div>
 
-          <div className={`lg:col-span-5 pt-6 lg:pt-0 lg:sticky lg:top-32 h-fit space-y-8 transition-all duration-300 ease-out ${!showRealContent ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+          <div className={`lg:col-span-5 pt-8 lg:pt-0 lg:sticky lg:top-32 h-fit space-y-8 transition-all duration-500 ease-out delay-75 ${!showRealContent ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'}`}>
               <div className="space-y-4">
                 <div className="flex justify-between items-start gap-4">
                   <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 leading-[1.1]">
@@ -365,9 +334,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
         </div>
       </div>
 
+      {/* Floating Bottom Bar Mobile CTA */}
       <div 
-        className={`fixed bottom-0 inset-x-0 z-[45] bg-white/95 backdrop-blur-xl border-t border-gray-100 px-4 py-4 md:hidden flex items-center gap-4 transition-all duration-300 transform ${
-          isScrolledPastCTA ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+        className={`fixed bottom-20 inset-x-4 z-[45] bg-white/95 backdrop-blur-xl border border-gray-200 rounded-xl px-4 py-3 md:hidden flex items-center gap-4 shadow-2xl transition-all duration-300 transform ${
+          isScrolledPastCTA ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'
         }`}
       >
         <div className="flex-1 min-w-0">
@@ -377,7 +347,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, originRect, onBa
         <button
           onClick={() => isAvailable && onAddToCart(product, selectedVariantId)}
           disabled={!isAvailable}
-          className="flex-1 bg-black text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+          className="flex-1 bg-black text-white py-3 rounded-lg font-bold text-xs uppercase tracking-widest shadow-md flex items-center justify-center gap-2"
         >
           <ShoppingBag size={16} /> Add to Bag
         </button>

@@ -1,5 +1,4 @@
 
-
 export interface ShopifyImage {
   url: string;
   altText: string | null;
@@ -38,6 +37,7 @@ export interface ShopifyProduct {
 export interface ShopifyCollection {
   id: string;
   title: string;
+  handle: string;
   products: ShopifyProduct[];
 }
 

@@ -1,16 +1,18 @@
 
 import React from 'react';
-import { X, ChevronRight, Instagram, Twitter, Facebook, LogOut, User } from 'lucide-react';
+import { X, ChevronRight, Instagram, Twitter, Facebook, LogOut, User, FolderOpen } from 'lucide-react';
 import { ShopifyImage } from '../ui/ShopifyImage';
 import { useAuth } from '../../contexts/AuthContext';
+import { ShopifyCollection } from '../../types/index';
 
 interface MobileMenuProps {
   isOpen: boolean;
+  collections?: ShopifyCollection[];
   onClose: () => void;
   onNavigate: () => void;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onNavigate }) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, collections = [], onClose, onNavigate }) => {
   const { isAuthenticated, customer, logout, setShowAuthModal, setAuthView } = useAuth();
 
   const handleAuthAction = () => {
@@ -21,6 +23,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onNavigate }) 
         setAuthView('login');
         setShowAuthModal(true);
     }
+  };
+
+  const navigateTo = (handle: string) => {
+    window.location.hash = `#collection/${handle}`;
+    onNavigate();
   };
 
   return (
@@ -65,37 +72,23 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onNavigate }) 
             </div>
           )}
 
-          {/* Featured Banner (Only show if not logged in to save space) */}
-          {!isAuthenticated && (
-            <div className="p-5 pb-2">
-                <div className="relative aspect-[2/1] rounded-xl overflow-hidden mb-6">
-                <ShopifyImage 
-                    src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" 
-                    alt="New Collection" 
-                    sizes="350px"
-                    className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/20" />
-                <div className="absolute bottom-4 left-4 text-white">
-                    <p className="text-xs font-bold uppercase tracking-wider mb-1">New In</p>
-                    <h3 className="font-serif text-xl">Summer 2025</h3>
-                </div>
-                </div>
+          <div className="px-5 py-6">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 flex items-center gap-2">
+              <FolderOpen size={12} /> Collections
+            </h3>
+            <div className="space-y-1">
+              {collections.map((col) => (
+                <button 
+                  key={col.id}
+                  onClick={() => navigateTo(col.handle)} 
+                  className="flex items-center justify-between w-full py-4 border-b border-gray-50 text-left group min-h-[44px]"
+                >
+                  <span className="text-lg font-bold text-gray-900 group-hover:pl-2 transition-all duration-300">{col.title}</span>
+                  <ChevronRight size={18} className="text-gray-300 group-hover:text-black transition-colors" />
+                </button>
+              ))}
             </div>
-          )}
-
-          <nav className="px-5 space-y-1">
-            {['New Arrivals', 'Shop All', 'Best Sellers', 'Men', 'Women', 'Accessories', 'Journal'].map((item) => (
-              <button 
-                key={item}
-                onClick={onNavigate} 
-                className="flex items-center justify-between w-full py-4 border-b border-gray-50 text-left group min-h-[44px]"
-              >
-                <span className="text-xl font-medium text-gray-900 group-hover:pl-2 transition-all duration-300">{item}</span>
-                <ChevronRight size={18} className="text-gray-300 group-hover:text-black transition-colors" />
-              </button>
-            ))}
-          </nav>
+          </div>
           
           <div className="p-5 mt-4 space-y-4">
              <button 
