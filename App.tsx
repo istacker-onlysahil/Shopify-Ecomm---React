@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useCallback } from 'react';
 
 // Types & Services
 import { ShopifyProduct, ApiConfig, ToastMessage, ShopifyCollection, TransitionRect } from './types/index';
 import { DEFAULT_CONFIG } from './config/constants';
 import { fetchShopifyCollections } from './services/shopify';
 import { useCart } from './hooks/useCart';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // UI & Layout
 import Toast from './components/ui/Toast';
@@ -40,6 +40,11 @@ const StorefrontApp: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   
+  // Search state is needed at top level to be triggered by dock
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  
+  const { isAuthenticated, setShowAuthModal, setAuthView } = useAuth();
+
   // Selected Product & Transition State
   const [selectedProduct, setSelectedProduct] = useState<ShopifyProduct | null>(null);
   const [selectedCollection, setSelectedCollection] = useState<ShopifyCollection | null>(null);
@@ -157,12 +162,23 @@ const StorefrontApp: React.FC = () => {
     window.location.hash = `#product/${product.handle}`;
   };
 
-  const handleBackToHome = () => {
+  const handleBackToHome = useCallback(() => {
     window.location.hash = '';
     setSelectedProduct(null);
     setSelectedCollection(null);
     setIs404(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const handleOpenAuth = () => {
+    if (isAuthenticated) {
+        // Just show account info or handled by navbar/dock
+        setAuthView('login'); // default
+        setShowAuthModal(true);
+    } else {
+        setAuthView('login');
+        setShowAuthModal(true);
+    }
   };
 
   return (
@@ -178,6 +194,9 @@ const StorefrontApp: React.FC = () => {
         onSelectProduct={handleProductSelect}
         setCartOpen={setCartOpen}
         cartCount={cartCount}
+        // Force the search bar to show if dock search is clicked
+        showSearchOverride={showMobileSearch}
+        onSearchToggle={setShowMobileSearch}
       />
 
       <MobileMenu 
@@ -188,9 +207,13 @@ const StorefrontApp: React.FC = () => {
       />
 
       <MobileDock 
-        onOpenCart={() => setCartOpen(true)}
-        onOpenMenu={() => setMobileMenuOpen(true)}
-        cartCount={cartCount}
+        collections={collections}
+        onOpenSearch={() => {
+            setShowMobileSearch(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onOpenAuth={handleOpenAuth}
+        onNavigateHome={handleBackToHome}
       />
 
       <main className="relative" id="main-content" role="main">

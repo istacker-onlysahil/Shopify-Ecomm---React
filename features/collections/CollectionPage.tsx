@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Filter, SlidersHorizontal, ChevronDown, LayoutGrid, List, ArrowLeft, Search, Check } from 'lucide-react';
+import { Filter, ChevronDown, ArrowLeft, Check, X } from 'lucide-react';
 import { ShopifyCollection, ShopifyProduct, TransitionRect } from '../../types/index';
 import ProductCard from '../products/ProductCard';
 import { Reveal } from '../../components/ui/Reveal';
@@ -26,9 +26,6 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [inStockOnly, setInStockOnly] = useState(false);
 
-  // Blinkit Style: Density Control
-  const [columns, setColumns] = useState<2 | 3>(3); // 3 columns for mobile density
-
   const filteredProducts = useMemo(() => {
     let prods = [...collection.products];
 
@@ -47,8 +44,7 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
 
   return (
     <div className="min-h-screen bg-white pb-24 md:pb-12">
-      {/* Sticky Mobile Sub-Header (Quick Switch) */}
-      <div className="sticky top-14 md:top-20 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 py-2 md:py-3 animate-fade-in">
+      <div className="sticky top-14 md:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-gray-50 py-2.5 animate-fade-in">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center gap-3 overflow-x-auto no-scrollbar">
            <button 
              onClick={onBack}
@@ -56,7 +52,7 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
            >
              <ArrowLeft size={16} />
            </button>
-           <div className="h-6 w-px bg-gray-200 flex-shrink-0" />
+           <div className="h-6 w-px bg-gray-100 flex-shrink-0" />
            {allCollections.map(col => (
              <button
                key={col.id}
@@ -65,8 +61,8 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
                    window.location.hash = `#collection/${col.handle}`;
                  }
                }}
-               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                 col.id === collection.id ? 'bg-black text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+               className={`flex-shrink-0 px-5 py-2 rounded-full text-[10px] md:text-xs font-semibold uppercase tracking-widest transition-all whitespace-nowrap ${
+                 col.id === collection.id ? 'bg-black text-white shadow-lg' : 'bg-gray-50 text-gray-400 hover:text-black hover:bg-gray-100'
                }`}
              >
                {col.title}
@@ -75,44 +71,28 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 md:pt-10">
-        <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-1">
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900">{collection.title}</h1>
-            <p className="text-sm text-gray-500 font-medium">{filteredProducts.length} items discovered</p>
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 md:pt-12">
+        <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1.5">
+            <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-gray-900 leading-tight">{collection.title}</h1>
+            <p className="text-[10px] md:text-xs text-gray-400 font-medium uppercase tracking-widest">{filteredProducts.length} DISCOVERIES</p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
-            {/* Density Selector */}
-            <div className="bg-gray-50 p-1 rounded-lg flex items-center md:hidden mr-2">
-              <button 
-                onClick={() => setColumns(2)}
-                className={`p-1.5 rounded-md transition-all ${columns === 2 ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}
-              >
-                <LayoutGrid size={16} />
-              </button>
-              <button 
-                onClick={() => setColumns(3)}
-                className={`p-1.5 rounded-md transition-all ${columns === 3 ? 'bg-white shadow-sm text-black' : 'text-gray-400'}`}
-              >
-                <SlidersHorizontal size={16} className="rotate-90" />
-              </button>
-            </div>
-
+          <div className="flex items-center gap-3 self-start md:self-auto">
             <button 
               onClick={() => setIsFilterOpen(true)}
-              className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors shadow-sm"
+              className="flex items-center gap-2 bg-white border border-gray-100 hover:border-black px-5 py-2.5 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all shadow-sm"
             >
-              <Filter size={14} /> Filters
+              <Filter size={14} /> Filter
             </button>
 
             <div className="relative group hidden md:block">
-              <button className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors shadow-sm">
-                Sort <ChevronDown size={14} />
+              <button className="flex items-center gap-2 bg-white border border-gray-100 hover:border-black px-5 py-2.5 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all shadow-sm">
+                Sort By <ChevronDown size={14} />
               </button>
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all z-50">
+              <div className="absolute top-full right-0 mt-3 w-52 bg-white rounded-xl shadow-2xl border border-gray-50 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all translate-y-2 group-hover:translate-y-0 z-50">
                  {[
-                   { id: 'featured', label: 'Featured' },
+                   { id: 'featured', label: 'Recommended' },
                    { id: 'price-low-high', label: 'Price: Low to High' },
                    { id: 'price-high-low', label: 'Price: High to Low' },
                    { id: 'newest', label: 'New Arrivals' }
@@ -120,10 +100,10 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
                    <button 
                      key={opt.id}
                      onClick={() => setSortBy(opt.id as any)}
-                     className="w-full text-left px-4 py-2.5 text-xs font-medium hover:bg-gray-50 flex justify-between items-center"
+                     className="w-full text-left px-5 py-3 text-[11px] font-medium uppercase tracking-wider hover:bg-gray-50 flex justify-between items-center transition-colors"
                    >
                      {opt.label}
-                     {sortBy === opt.id && <Check size={12} className="text-green-500" />}
+                     {sortBy === opt.id && <Check size={12} className="text-black" />}
                    </button>
                  ))}
               </div>
@@ -131,12 +111,9 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
           </div>
         </header>
 
-        {/* High Density Grid */}
-        <div className={`grid gap-x-2 gap-y-6 md:gap-x-6 md:gap-y-12 ${
-          columns === 2 ? 'grid-cols-2' : 'grid-cols-3'
-        } md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6`}>
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-2 gap-y-8 md:gap-x-6 md:gap-y-16">
            {filteredProducts.map((product, idx) => (
-             <Reveal key={product.id} delay={idx % 10 * 30}>
+             <Reveal key={product.id} delay={(idx % 6) * 40}>
                <ProductCard 
                  product={product}
                  onAddToCart={onAddToCart}
@@ -147,38 +124,37 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
         </div>
       </div>
 
-      {/* Filter Bottom Sheet (Mobile) & Sidebar (Implicit Overlay) */}
       {isFilterOpen && (
         <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center animate-fade-in">
           <div 
             className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" 
             onClick={() => setIsFilterOpen(false)} 
           />
-          <div className="relative w-full md:max-w-md bg-white rounded-t-[2rem] md:rounded-2xl p-6 md:p-8 shadow-2xl animate-slide-up">
-            <div className="flex items-center justify-between mb-8">
-               <h3 className="text-xl font-bold uppercase tracking-widest">Filters</h3>
-               <button onClick={() => setIsFilterOpen(false)} className="p-2 bg-gray-50 rounded-full"><SlidersHorizontal size={18} /></button>
+          <div className="relative w-full md:max-w-md bg-white rounded-t-[2.5rem] md:rounded-3xl p-6 md:p-10 shadow-2xl animate-slide-up">
+            <div className="flex items-center justify-between mb-10">
+               <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-gray-900">Refine Search</h3>
+               <button onClick={() => setIsFilterOpen(false)} className="p-2.5 bg-gray-50 rounded-full text-gray-400 hover:text-black transition-colors"><X size={20} /></button>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-10">
                <div className="space-y-4">
-                 <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Availability</label>
-                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <span className="text-sm font-semibold">In Stock Only</span>
+                 <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400">Inventory</label>
+                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <span className="text-sm font-medium text-gray-900">Show only available items</span>
                     <button 
                       onClick={() => setInStockOnly(!inStockOnly)}
-                      className={`w-12 h-6 rounded-full relative transition-colors ${inStockOnly ? 'bg-black' : 'bg-gray-200'}`}
+                      className={`w-11 h-6 rounded-full relative transition-all duration-300 ${inStockOnly ? 'bg-black' : 'bg-gray-200'}`}
                     >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${inStockOnly ? 'left-7' : 'left-1'}`} />
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 ${inStockOnly ? 'left-6' : 'left-1'}`} />
                     </button>
                  </div>
                </div>
 
                <div className="space-y-4">
-                 <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Sort By</label>
-                 <div className="grid grid-cols-1 gap-2">
+                 <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400">Order By</label>
+                 <div className="grid grid-cols-1 gap-2.5">
                     {[
-                      { id: 'featured', label: 'Featured' },
+                      { id: 'featured', label: 'Recommended' },
                       { id: 'price-low-high', label: 'Price: Low to High' },
                       { id: 'price-high-low', label: 'Price: High to Low' },
                       { id: 'newest', label: 'New Arrivals' }
@@ -186,8 +162,8 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
                       <button 
                         key={opt.id}
                         onClick={() => setSortBy(opt.id as any)}
-                        className={`w-full text-left px-4 py-3 text-sm font-bold rounded-xl border-2 transition-all ${
-                          sortBy === opt.id ? 'border-black bg-black text-white shadow-lg' : 'border-gray-100 bg-white hover:border-gray-200'
+                        className={`w-full text-left px-5 py-4 text-xs font-semibold uppercase tracking-widest rounded-2xl border transition-all ${
+                          sortBy === opt.id ? 'border-black bg-black text-white shadow-xl' : 'border-gray-100 bg-white hover:border-gray-200 text-gray-500'
                         }`}
                       >
                         {opt.label}
@@ -198,9 +174,9 @@ const CollectionPage: React.FC<CollectionPageProps> = ({
 
                <button 
                  onClick={() => setIsFilterOpen(false)}
-                 className="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest shadow-xl active:scale-[0.98] transition-all"
+                 className="w-full bg-black text-white py-5 rounded-2xl font-semibold uppercase tracking-[0.2em] shadow-2xl active:scale-[0.98] transition-all mt-4"
                >
-                 Show Results
+                 Apply Filters
                </button>
             </div>
           </div>

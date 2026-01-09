@@ -25,25 +25,24 @@ const HeroSection: React.FC = () => {
         <div className="absolute inset-0 bg-black/10" />
 
         <div className="absolute inset-0 flex flex-col justify-center items-start text-left md:items-center md:text-center text-white p-6 md:p-12">
-          <h1 className="text-2xl md:text-6xl lg:text-7xl font-medium mb-2 md:mb-4 tracking-tight leading-tight drop-shadow-sm animate-fade-in-up">
+          <h1 className="text-2xl md:text-6xl lg:text-7xl font-medium mb-2 md:mb-4 tracking-tight leading-tight animate-fade-in-up">
             Summer <br className="md:hidden"/> Arrival
           </h1>
-          <p className="text-xs md:text-lg max-w-xl text-white/90 mb-4 md:mb-8 font-light hidden md:block drop-shadow-sm animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <p className="text-xs md:text-lg max-w-xl text-white/90 mb-4 md:mb-8 font-normal hidden md:block animate-fade-in-up" style={{ animationDelay: '100ms' }}>
             Discover quality fashion that reflects your style and makes everyday enjoyable.
           </p>
           <button 
             onClick={() => navigateToCollection('new-arrivals')}
-            className="bg-white text-black px-4 py-2 md:px-8 md:py-3 rounded-full text-[10px] md:text-sm font-bold tracking-wide uppercase flex items-center gap-2 hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl hover:scale-105 duration-300 animate-fade-in-up" 
+            className="bg-white text-black px-5 py-2.5 md:px-8 md:py-3.5 rounded-full text-[10px] md:text-xs font-semibold tracking-widest uppercase flex items-center gap-2 hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl active:scale-95 duration-300 animate-fade-in-up" 
             style={{ animationDelay: '200ms' }}
           >
-            Shop Now <ArrowRight size={12} className="md:w-4 md:h-4" />
+            Shop Now <ArrowRight size={14} />
           </button>
         </div>
       </div>
 
       {/* Sub Banners Grid */}
       <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Card */}
         <Reveal delay={100}>
           <div 
             onClick={() => navigateToCollection('fragrances')}
@@ -53,22 +52,20 @@ const HeroSection: React.FC = () => {
                   <h3 className="text-2xl md:text-3xl text-gray-900 font-medium leading-tight mb-6">
                       Where dreams meet couture
                   </h3>
-                  <button className="bg-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wide hover:shadow-lg transition-all shadow-sm text-gray-900 hover:scale-105">
+                  <button className="bg-white px-6 py-2.5 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all shadow-sm text-gray-900 hover:bg-black hover:text-white">
                       View Collection
                   </button>
               </div>
               <div className="absolute right-0 top-0 bottom-0 w-3/5">
                   <ShopifyImage 
                     src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800" 
-                    alt="Dreams meet couture" 
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="w-full h-full object-cover object-center"
+                    alt="Couture" 
+                    className="w-full h-full object-cover"
                   />
               </div>
           </div>
         </Reveal>
 
-        {/* Right Card */}
         <Reveal delay={200}>
            <div 
              onClick={() => navigateToCollection('new-arrivals')}
@@ -76,18 +73,17 @@ const HeroSection: React.FC = () => {
            >
               <div className="w-1/2 p-8 md:p-10 z-10">
                   <h3 className="text-2xl md:text-3xl text-gray-900 font-medium leading-tight mb-6">
-                      Enchanting styles for every women
+                      Enchanting styles for her
                   </h3>
-                  <button className="bg-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wide hover:shadow-lg transition-all shadow-sm text-gray-900 hover:scale-105">
+                  <button className="bg-white px-6 py-2.5 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all shadow-sm text-gray-900 hover:bg-black hover:text-white">
                       Explore More
                   </button>
               </div>
               <div className="absolute right-0 top-0 bottom-0 w-3/5">
                    <ShopifyImage 
                     src="https://images.unsplash.com/photo-1550614000-4b9519e49052?auto=format&fit=crop&q=80&w=800" 
-                    alt="Enchanting styles" 
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="w-full h-full object-cover object-center"
+                    alt="Styles" 
+                    className="w-full h-full object-cover"
                   />
               </div>
           </div>
