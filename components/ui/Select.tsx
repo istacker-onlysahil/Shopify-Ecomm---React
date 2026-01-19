@@ -79,10 +79,10 @@ export const Select: React.FC<SelectProps> = ({
         ref={containerRef}
         type="button"
         onClick={toggleOpen}
-        className={`flex h-7 md:h-9 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-2 py-1 text-[10px] md:text-xs font-medium text-gray-900 shadow-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        className={`flex w-full items-center justify-between rounded-md border border-gray-200 bg-white px-2 py-1.5 text-xs font-medium text-gray-900 shadow-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
       >
         <span className="truncate">{selectedLabel}</span>
-        <ChevronDown className="h-3 w-3 opacity-50 ml-1" />
+        <ChevronDown className="h-3 w-3 opacity-50 ml-1 flex-shrink-0" />
       </button>
 
       {isOpen && createPortal(

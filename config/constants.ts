@@ -6,7 +6,7 @@ export const DEFAULT_CONFIG: ApiConfig = {
   domain: 'the-website-preview.myshopify.com',
   // User provided Admin Access Token
   accessToken: '8bae080f4c6605cd4fa7e4078dc491e7', 
-  // Set to true for Admin API context (shpat_ or private tokens)
+  // Set to false for Admin API context
   isStorefrontToken: true, 
 };
 

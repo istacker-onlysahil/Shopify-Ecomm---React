@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { X, Minus, Plus, ShoppingBag, Trash2, ArrowRight, Truck, Tag, Gift, ChevronRight, MessageSquare, ShieldCheck } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, Trash2, ArrowRight, Truck, Tag, Gift, ChevronRight, MessageSquare, ShieldCheck, RefreshCw } from 'lucide-react';
 import { CartItem } from '../../types/index';
 import { DEFAULT_CONFIG } from '../../config/constants';
 import { Select } from '../../components/ui/Select';
+import { useCart } from '../../hooks/useCart';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -85,7 +86,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
             <div className="flex items-center justify-between mb-4">
               <h2 id="cart-heading" className="text-xl md:text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
                 Cart
-                <span className="text-xs font-bold text-white bg-black px-2 py-0.5 rounded-full">{items.length}</span>
+                <span className="text-xs font-bold text-white bg-black px-2 py-0.5 rounded-full">{items.reduce((a,c) => a + c.quantity, 0)}</span>
               </h2>
               <button 
                 onClick={onClose}
@@ -160,7 +161,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, items, onUpdat
                              <p className="font-bold text-gray-900 text-sm whitespace-nowrap">{formatPrice(item.price * item.quantity)}</p>
                            </div>
                            
-                           {/* Variant Selector or Badge */}
+                           {/* Variant Selector */}
                            <div className="w-full max-w-[140px] mt-1">
                                 {item.variants && item.variants.length > 1 ? (
                                     <Select 

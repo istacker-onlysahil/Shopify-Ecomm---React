@@ -128,33 +128,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onClick
         </div>
       </div>
 
-      <div className="flex flex-col pt-2.5 pb-1 px-0.5 space-y-1 flex-1">
-        <h3 className="text-[10px] md:text-xs font-medium text-gray-900 line-clamp-1 transition-colors group-hover:text-black">
+      <div className="flex flex-col pt-3 pb-1 px-1 space-y-2 flex-1">
+        <h3 className="text-[10px] md:text-xs font-medium text-gray-900 line-clamp-2 min-h-[1.5em] leading-relaxed transition-colors group-hover:text-black">
            {title}
         </h3>
         
-        <div className="w-full relative z-20 h-6" onClick={e => e.stopPropagation()}>
+        <div className="w-full relative z-20" onClick={e => e.stopPropagation()}>
             {hasMultipleVariants ? (
                 <Select 
                     value={selectedVariantId}
                     onChange={setSelectedVariantId}
                     options={variantOptions}
-                    className="text-[9px] h-6 py-0"
+                    className="text-[10px] py-1.5"
                 />
             ) : (
-                <div className="flex items-center h-full">
-                    <span className="text-[8px] md:text-[9px] font-medium text-gray-400 uppercase tracking-widest">
+                <div className="flex items-center h-8">
+                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">
                       One Size
                     </span>
                 </div>
             )}
         </div>
 
-        <div className="flex items-center gap-1.5 mt-auto pt-0.5">
-            <span className="text-[11px] md:text-sm font-semibold text-gray-900">
+        <div className="flex items-center gap-2 mt-auto pt-1">
+            <span className="text-xs md:text-sm font-semibold text-gray-900">
                 {formattedPrice}
             </span>
-            <span className="text-[9px] text-gray-400 line-through font-normal">
+            <span className="text-[10px] text-gray-400 line-through font-normal">
                 {formattedComparePrice}
             </span>
         </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MoveRight } from 'lucide-react';
 import { Reveal } from '../../components/ui/Reveal';
 import { ShopifyImage } from '../../components/ui/ShopifyImage';
 
@@ -10,84 +10,98 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <div className="pt-6 md:pt-10 pb-4 md:pb-12 max-w-[1440px] mx-auto px-2 md:px-8 space-y-3 md:space-y-6">
+    <div className="pt-2 md:pt-4 pb-8 md:pb-16 max-w-[1440px] mx-auto px-2 md:px-6">
       
-      {/* Main Hero Banner */}
-      <div className="relative w-full aspect-[2/1] md:aspect-[21/9] rounded-xl md:rounded-[2rem] overflow-hidden group shadow-sm">
-        <ShopifyImage 
-          src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=2000" 
-          alt="Summer Arrival" 
-          priority={true}
-          sizes="(max-width: 768px) 100vw, 100vw"
-          className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#598ca8]/90 to-transparent mix-blend-multiply" />
-        <div className="absolute inset-0 bg-black/10" />
-
-        <div className="absolute inset-0 flex flex-col justify-center items-start text-left md:items-center md:text-center text-white p-6 md:p-12">
-          <h1 className="text-2xl md:text-6xl lg:text-7xl font-medium mb-2 md:mb-4 tracking-tight leading-tight animate-fade-in-up">
-            Summer <br className="md:hidden"/> Arrival
-          </h1>
-          <p className="text-xs md:text-lg max-w-xl text-white/90 mb-4 md:mb-8 font-normal hidden md:block animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            Discover quality fashion that reflects your style and makes everyday enjoyable.
-          </p>
-          <button 
-            onClick={() => navigateToCollection('new-arrivals')}
-            className="bg-white text-black px-5 py-2.5 md:px-8 md:py-3.5 rounded-full text-[10px] md:text-xs font-semibold tracking-widest uppercase flex items-center gap-2 hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl active:scale-95 duration-300 animate-fade-in-up" 
-            style={{ animationDelay: '200ms' }}
-          >
-            Shop Now <ArrowRight size={14} />
-          </button>
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 h-auto md:h-[600px] lg:h-[700px]">
+        
+        {/* Main Hero Block - Spans full on mobile, 8 cols on desktop */}
+        <div className="md:col-span-8 relative group rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-gray-100 min-h-[500px] md:min-h-full">
+            <ShopifyImage 
+              src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop" 
+              alt="Summer Campaign" 
+              priority={true}
+              sizes="(max-width: 768px) 100vw, 66vw"
+              className="w-full h-full object-cover object-[center_30%] transition-transform duration-1000 ease-out group-hover:scale-105"
+            />
+            
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-90" />
+            
+            {/* Content */}
+            <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 text-white">
+                <div className="max-w-xl animate-fade-in-up">
+                  <span className="inline-block px-3 py-1 mb-4 text-[10px] font-bold uppercase tracking-[0.2em] bg-white/20 backdrop-blur-md rounded-full border border-white/20">
+                    SS25 Collection
+                  </span>
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-medium leading-[1.1] mb-6 tracking-tight">
+                    Redefining <br/> <span className="italic">Modern Elegance</span>
+                  </h1>
+                  <p className="hidden md:block text-base text-white/90 mb-8 max-w-sm font-light leading-relaxed">
+                    Explore a curation of pieces designed to elevate your everyday moments into something extraordinary.
+                  </p>
+                  
+                  <button 
+                    onClick={() => navigateToCollection('new-arrivals')}
+                    className="group bg-white text-black pl-6 pr-5 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-3 transition-all hover:bg-gray-100 hover:scale-105"
+                  >
+                    Shop Collection 
+                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+            </div>
         </div>
-      </div>
 
-      {/* Sub Banners Grid */}
-      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Reveal delay={100}>
-          <div 
-            onClick={() => navigateToCollection('fragrances')}
-            className="relative h-[300px] md:h-[350px] rounded-[2rem] overflow-hidden bg-[#faecc9] group flex items-center shadow-sm cursor-pointer"
-          >
-              <div className="w-1/2 p-8 md:p-10 z-10">
-                  <h3 className="text-2xl md:text-3xl text-gray-900 font-medium leading-tight mb-6">
-                      Where dreams meet couture
-                  </h3>
-                  <button className="bg-white px-6 py-2.5 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all shadow-sm text-gray-900 hover:bg-black hover:text-white">
-                      View Collection
-                  </button>
-              </div>
-              <div className="absolute right-0 top-0 bottom-0 w-3/5">
-                  <ShopifyImage 
-                    src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800" 
-                    alt="Couture" 
-                    className="w-full h-full object-cover"
-                  />
-              </div>
-          </div>
-        </Reveal>
+        {/* Secondary Column - Spans 4 cols on desktop, hidden/stacked on mobile */}
+        <div className="md:col-span-4 flex flex-col gap-2 md:gap-4">
+            
+            {/* Top Right Block */}
+            <div 
+              onClick={() => navigateToCollection('fragrances')}
+              className="relative flex-1 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden group cursor-pointer min-h-[250px]"
+            >
+                <ShopifyImage 
+                  src="https://images.unsplash.com/photo-1595867252085-b162fb5244be?q=80&w=800&auto=format&fit=crop" 
+                  alt="Accessories" 
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
+                    <div className="self-end bg-white/90 backdrop-blur text-black p-2 rounded-full">
+                       <MoveRight size={16} className="-rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-medium mb-1">Fragrances</h3>
+                      <p className="text-xs text-white/80">Essence of Luxury</p>
+                    </div>
+                </div>
+            </div>
 
-        <Reveal delay={200}>
-           <div 
-             onClick={() => navigateToCollection('new-arrivals')}
-             className="relative h-[300px] md:h-[350px] rounded-[2rem] overflow-hidden bg-[#fddfe7] group flex items-center shadow-sm cursor-pointer"
-           >
-              <div className="w-1/2 p-8 md:p-10 z-10">
-                  <h3 className="text-2xl md:text-3xl text-gray-900 font-medium leading-tight mb-6">
-                      Enchanting styles for her
-                  </h3>
-                  <button className="bg-white px-6 py-2.5 rounded-full text-[10px] font-semibold uppercase tracking-widest transition-all shadow-sm text-gray-900 hover:bg-black hover:text-white">
-                      Explore More
-                  </button>
-              </div>
-              <div className="absolute right-0 top-0 bottom-0 w-3/5">
-                   <ShopifyImage 
-                    src="https://images.unsplash.com/photo-1550614000-4b9519e49052?auto=format&fit=crop&q=80&w=800" 
-                    alt="Styles" 
-                    className="w-full h-full object-cover"
-                  />
-              </div>
-          </div>
-        </Reveal>
+            {/* Bottom Right Block */}
+            <div 
+               onClick={() => navigateToCollection('new-arrivals')}
+               className="relative flex-1 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden group cursor-pointer min-h-[250px]"
+            >
+                <ShopifyImage 
+                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop" 
+                  alt="New Arrivals" 
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
+                    <div className="self-end bg-white/90 backdrop-blur text-black p-2 rounded-full">
+                       <MoveRight size={16} className="-rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-medium mb-1">New Arrivals</h3>
+                      <p className="text-xs text-white/80">Fresh for the Season</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
       </div>
     </div>
   );

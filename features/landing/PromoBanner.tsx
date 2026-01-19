@@ -6,29 +6,40 @@ import { ShopifyImage } from '../../components/ui/ShopifyImage';
 
 const PromoBanner: React.FC = () => {
   return (
-    <section className="py-12 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-8 md:py-20 w-full px-2 md:px-6">
       <Reveal>
-        <div className="relative rounded-[2.5rem] overflow-hidden bg-purple-900 h-[300px] md:h-[400px] flex items-center justify-center text-center px-4 shadow-xl">
-          <div className="absolute inset-0 w-full h-full">
+        <div className="relative w-full max-w-[1440px] mx-auto h-[450px] md:h-[600px] rounded-[2rem] overflow-hidden group">
+          {/* Background Image */}
+          <div className="absolute inset-0">
             <ShopifyImage 
-              src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=2000" 
-              alt="Exclusive Offers" 
-              sizes="(max-width: 1440px) 100vw, 1440px"
-              className="w-full h-full object-cover mix-blend-overlay opacity-60 transition-transform duration-1000 hover:scale-105"
+              src="https://images.unsplash.com/photo-1485230946086-1d99d529a763?auto=format&fit=crop&q=80&w=2000" 
+              alt="Editorial Campaign" 
+              sizes="100vw"
+              className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 to-transparent pointer-events-none" />
           
-          <div className="relative z-10 max-w-3xl">
-            <div className="inline-block px-4 py-1 rounded-full border border-white/30 text-white text-[10px] uppercase tracking-widest mb-6 backdrop-blur-md animate-fade-in-up">
-              Offers
+          {/* Overlays */}
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent md:bg-gradient-to-r md:from-black/60 md:to-transparent" />
+          
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col justify-end md:justify-center p-8 md:p-20 text-white">
+            <div className="max-w-2xl transform transition-transform duration-700 translate-y-4 group-hover:translate-y-0">
+              <span className="inline-block px-3 py-1 mb-6 text-[10px] font-bold uppercase tracking-[0.2em] border border-white/30 rounded-full backdrop-blur-sm">
+                Limited Edition
+              </span>
+              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif font-medium mb-6 leading-[1.1]">
+                The Monochrome <br/> <span className="italic font-light">Series.</span>
+              </h2>
+              <p className="text-sm md:text-lg text-white/90 mb-10 max-w-md font-light leading-relaxed">
+                A capsule collection defined by sharp contrasts and timeless silhouettes. Experience the new standard of bold.
+              </p>
+              
+              <button className="bg-white text-black px-10 py-4 rounded-full text-xs font-bold uppercase tracking-widest inline-flex items-center gap-3 hover:bg-gray-100 transition-colors">
+                Explore The Edit <ArrowRight size={16} />
+              </button>
             </div>
-            <h2 className="text-3xl md:text-5xl font-medium text-white mb-8 leading-tight drop-shadow-md">
-              EXCLUSIVE FASHION OFFERS <br /> AWAIT FOR YOUR
-            </h2>
-            <button className="bg-white text-gray-900 px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wide inline-flex items-center gap-2 hover:bg-gray-100 hover:scale-105 transition-all shadow-lg">
-              Check It Now <ArrowRight size={14} />
-            </button>
           </div>
         </div>
       </Reveal>

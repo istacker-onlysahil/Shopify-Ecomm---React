@@ -1,32 +1,51 @@
+
 import React from 'react';
-import { Check, Loader2, ExternalLink } from 'lucide-react';
+import { Leaf, Award, ShieldCheck, Truck } from 'lucide-react';
+import { Reveal } from '../../components/ui/Reveal';
+
+const features = [
+  {
+    icon: Leaf,
+    title: "Sustainability First",
+    desc: "Crafted with 100% recycled materials and eco-friendly processes."
+  },
+  {
+    icon: Award,
+    title: "Artisan Quality",
+    desc: "Hand-finished details by master craftsmen for lasting durability."
+  },
+  {
+    icon: Truck,
+    title: "Global Shipping",
+    desc: "Complimentary express delivery on all international orders over $200."
+  },
+  {
+    icon: ShieldCheck,
+    title: "Lifetime Warranty",
+    desc: "We stand by our quality. Repairs are on us, forever."
+  }
+];
 
 const FeaturesSection: React.FC = () => {
   return (
-    <section className="bg-white py-24 border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
-              <div className="flex flex-col items-center p-4 animate-fade-in-up delay-75">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 text-accent transform transition-transform hover:scale-110 duration-300 ease-buttery">
-                      <Check className="w-8 h-8" />
+    <section className="py-12 md:py-16 bg-white border-b border-gray-50">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-8">
+              {features.map((feature, idx) => (
+                <Reveal key={idx} delay={idx * 50}>
+                  <div className="flex flex-col items-center text-center space-y-4 group cursor-default">
+                      <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-900 group-hover:scale-110 group-hover:bg-black group-hover:text-white transition-all duration-300">
+                          <feature.icon strokeWidth={1.5} size={24} />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-gray-900">{feature.title}</h3>
+                        <p className="text-xs text-gray-500 leading-relaxed max-w-[200px] mx-auto hidden md:block">
+                          {feature.desc}
+                        </p>
+                      </div>
                   </div>
-                  <h3 className="text-lg font-bold mb-3">Sustainable Materials</h3>
-                  <p className="text-gray-500 leading-relaxed max-w-xs text-sm">Sourced responsibly, ensuring minimal environmental impact without compromising quality.</p>
-              </div>
-              <div className="flex flex-col items-center p-4 animate-fade-in-up delay-100">
-                   <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 text-accent transform transition-transform hover:scale-110 duration-300 ease-buttery">
-                      <Loader2 className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-lg font-bold mb-3">Artisan Craftsmanship</h3>
-                  <p className="text-gray-500 leading-relaxed max-w-xs text-sm">Each piece is handcrafted by skilled artisans, making every item truly unique.</p>
-              </div>
-              <div className="flex flex-col items-center p-4 animate-fade-in-up delay-150">
-                   <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 text-accent transform transition-transform hover:scale-110 duration-300 ease-buttery">
-                      <ExternalLink className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-lg font-bold mb-3">Lifetime Warranty</h3>
-                  <p className="text-gray-500 leading-relaxed max-w-xs text-sm">We stand behind our products. If it breaks, we fix it. Simple as that.</p>
-              </div>
+                </Reveal>
+              ))}
           </div>
       </div>
     </section>

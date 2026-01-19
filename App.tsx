@@ -19,6 +19,7 @@ import NotFound from './features/error/NotFound';
 
 // Eager Loaded Features (Above the fold)
 import HeroSection from './features/landing/HeroSection';
+import FeaturesSection from './features/landing/FeaturesSection';
 import CategorySection from './features/landing/CategorySection';
 import ProductGrid from './features/products/ProductGrid';
 import ProductDetail from './features/products/ProductDetail';
@@ -237,7 +238,9 @@ const StorefrontApp: React.FC = () => {
         ) : (
           <div key="landing">
             <HeroSection />
+            <FeaturesSection />
             <CategorySection />
+            
             <ProductGrid 
               collections={collections}
               loading={loading}
@@ -250,9 +253,9 @@ const StorefrontApp: React.FC = () => {
               <ReviewsSection />
 
               {flatProducts.length > 0 && (
-                <section className="py-6 md:py-12 max-w-[1440px] mx-auto px-2 md:px-8">
+                <section className="py-6 md:py-16 max-w-[1440px] mx-auto px-2 md:px-8">
                   <Reveal>
-                    <h2 className="text-lg md:text-3xl font-medium text-gray-900 mb-4 md:mb-12 pl-1">You might also like</h2>
+                    <h2 className="text-xl md:text-3xl font-medium text-gray-900 mb-6 md:mb-12 pl-1 tracking-tight">You might also like</h2>
                   </Reveal>
                   <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-x-6 md:gap-y-10">
                     {flatProducts.slice(0, 5).map((product, idx) => (

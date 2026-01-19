@@ -1,11 +1,12 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { CartItem, ShopifyProduct } from '../types/index';
 
 const STORAGE_KEY = 'shopify-luxe-cart';
 
 export const useCart = () => {
   const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') return [];
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];
@@ -17,16 +18,32 @@ export const useCart = () => {
 
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Persistence Effect
+  // 1. Persistence Effect
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
     }
   }, [cart, isLoaded]);
 
-  // Initial load flag to prevent overwriting storage with empty array on first render
+  // 2. Initial load flag
   useEffect(() => {
     setIsLoaded(true);
+  }, []);
+
+  // 3. Cross-tab Synchronization
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const newCart = JSON.parse(e.newValue);
+          setCart(newCart);
+        } catch (err) {
+          console.error("Error syncing cart across tabs", err);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const addToCart = useCallback((product: ShopifyProduct, variantId?: string) => {
@@ -49,6 +66,7 @@ export const useCart = () => {
     setCart(prev => {
       const existing = prev.find(item => item.id === variant.id);
       if (existing) {
+        // Optimistic update
         return prev.map(item => 
           item.id === variant.id ? { ...item, quantity: item.quantity + 1, variants: allVariants } : item
         );
@@ -90,11 +108,11 @@ export const useCart = () => {
       const targetVariant = itemToUpdate.variants.find(v => v.id === newVariantId);
       if (!targetVariant) return prev;
 
-      // Check if the target variant is already in the cart as a separate item
+      // Check if the target variant is already in the cart
       const existingItemIndex = prev.findIndex(item => item.id === newVariantId);
 
       if (existingItemIndex > -1) {
-        // Merge quantities: Add old item's quantity to the existing item
+        // Merge: Add old item's quantity to the existing item
         const newCart = [...prev];
         newCart[existingItemIndex] = {
            ...newCart[existingItemIndex],
@@ -103,7 +121,7 @@ export const useCart = () => {
         // Remove the old item
         return newCart.filter(item => item.id !== oldVariantId);
       } else {
-        // Update the current item details in place
+        // Update in place
         return prev.map(item => {
           if (item.id === oldVariantId) {
             return {
@@ -111,7 +129,7 @@ export const useCart = () => {
               id: newVariantId,
               variantTitle: targetVariant.title === 'Default Title' ? '' : targetVariant.title,
               price: parseFloat(targetVariant.price.amount),
-              // Note: We keep the original image as our simplified variant type doesn't include images
+              // We keep original image or could update if variant has image
             };
           }
           return item;
@@ -122,10 +140,12 @@ export const useCart = () => {
 
   const clearCart = useCallback(() => {
     setCart([]);
+    localStorage.removeItem(STORAGE_KEY);
   }, []);
 
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  // Memoize totals to prevent recalculation on every render
+  const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart]);
+  const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
 
   return {
     cart,
